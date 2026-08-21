@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DictionaryRouteImport } from './routes/dictionary'
+import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
@@ -36,6 +37,11 @@ const DictionaryRoute = DictionaryRouteImport.update({
   path: '/dictionary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReferenceRoute = ReferenceRouteImport.update({
+  id: '/reference',
+  path: '/reference',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dictionary': typeof DictionaryRoute
+  '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dictionary': typeof DictionaryRoute
+  '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/dictionary': typeof DictionaryRoute
+  '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dictionary'
+    | '/reference'
     | '/reset-password'
     | '/admin'
     | '/profile/$userId'
@@ -93,6 +103,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dictionary'
+    | '/reference'
     | '/reset-password'
     | '/admin'
     | '/profile/$userId'
@@ -102,6 +113,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/dictionary'
+    | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/profile/$userId'
@@ -112,6 +124,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DictionaryRoute: typeof DictionaryRoute
+  ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -143,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/dictionary'
       fullPath: '/dictionary'
       preLoaderRoute: typeof DictionaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference': {
+      id: '/reference'
+      path: '/reference'
+      fullPath: '/reference'
+      preLoaderRoute: typeof ReferenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -187,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DictionaryRoute: DictionaryRoute,
+  ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
