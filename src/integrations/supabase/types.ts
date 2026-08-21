@@ -692,6 +692,26 @@ export type Database = {
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       refresh_leaderboard: { Args: never; Returns: undefined }
+      seed_question: {
+        Args: {
+          _category: string
+          _constraints: string
+          _description: string
+          _difficulty: string
+          _lang_slug: string
+          _memory_limit_mb?: number
+          _points: number
+          _sample_table?: string
+          _slug: string
+          _sql_setup?: string
+          _starter: string
+          _tests: Json
+          _tier?: string
+          _time_limit_ms?: number
+          _title: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "student" | "manager" | "admin"
