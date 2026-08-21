@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
-import { getCourses, getMyLessonProgress } from "@/lib/learn.functions";
+import { getCourses, getMyCourseProgress } from "@/lib/learn.functions";
 import { useAuth } from "@/hooks/useAuth";
 
 const coursesQuery = queryOptions({
@@ -56,9 +56,9 @@ const TINTS = [
 function LearnPage() {
   const { data: courses } = useSuspenseQuery(coursesQuery);
   const { isAuthenticated } = useAuth();
-  const fetchProgress = useServerFn(getMyLessonProgress);
+  const fetchProgress = useServerFn(getMyCourseProgress);
   const { data: progress } = useQuery({
-    queryKey: ["lesson-progress"],
+    queryKey: ["course-progress"],
     queryFn: () => fetchProgress(),
     enabled: isAuthenticated,
   });
@@ -72,7 +72,8 @@ function LearnPage() {
   }, [courses]);
 
   const filtered = courses.filter((c) => language === "all" || c.language_slug === language);
-  const completedCount = progress?.completed.length ?? 0;
+  const byCourse = progress?.byCourse ?? {};
+  const completedCount = Object.values(byCourse).reduce((a, b) => a + b, 0);
   const totalLessons = courses.reduce((sum, c) => sum + c.lesson_count, 0);
 
   return (
@@ -137,7 +138,9 @@ function LearnPage() {
                     <BookOpen className="size-3.5" /> {course.language_name}
                   </span>
                 </div>
-                {isAuthenticated && <CourseProgressBar courseId={course.id} total={course.lesson_count} />}
+                {isAuthenticated && (
+                  <CourseProgressBar done={byCourse[course.id] ?? 0} total={course.lesson_count} />
+                )}
               </Link>
             </BentoCard>
           ))}
@@ -152,9 +155,7 @@ function LearnPage() {
   );
 }
 
-function CourseProgressBar({ courseId, total }: { courseId: string; total: number }) {
-  const { data } = useQuery<{ done: number }>({ queryKey: ["course-progress", courseId], enabled: false });
-  const done = data?.done ?? 0;
+function CourseProgressBar({ done, total }: { done: number; total: number }) {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <div className="mt-4">
