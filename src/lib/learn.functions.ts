@@ -160,3 +160,24 @@ export const setLessonComplete = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+export const getMyCourseProgress = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ byCourse: Record<string, number> }> => {
+    const [{ data: progress }, { data: lessons }, { data: sections }] = await Promise.all([
+      context.supabase.from("lesson_progress").select("lesson_id").eq("user_id", context.userId).limit(2000),
+      context.supabase.from("course_lessons").select("id, section_id").limit(2000),
+      context.supabase.from("course_sections").select("id, course_id").limit(500),
+    ]);
+    const sectionToCourse = new Map((sections ?? []).map((s) => [s.id, s.course_id]));
+    const lessonToCourse = new Map(
+      (lessons ?? []).map((l) => [l.id, sectionToCourse.get(l.section_id) ?? null]),
+    );
+    const byCourse: Record<string, number> = {};
+    for (const row of progress ?? []) {
+      const courseId = lessonToCourse.get(row.lesson_id);
+      if (!courseId) continue;
+      byCourse[courseId] = (byCourse[courseId] ?? 0) + 1;
+    }
+    return { byCourse };
+  });
