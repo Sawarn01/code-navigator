@@ -20,6 +20,7 @@ import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
+import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
@@ -81,6 +82,11 @@ const EventsIndexRoute = EventsIndexRouteImport.update({
   path: '/events/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForumIndexRoute = ForumIndexRouteImport.update({
   id: '/forum/',
   path: '/forum/',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
   '/events/': typeof EventsIndexRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
   '/events': typeof EventsIndexRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
   '/events/': typeof EventsIndexRoute
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
     | '/events/'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
     | '/events'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
     | '/events/'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
   ForumPostIdRoute: typeof ForumPostIdRoute
   LearnCourseIdRoute: typeof LearnCourseIdRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forum/': {
       id: '/forum/'
       path: '/forum'
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
   ForumPostIdRoute: ForumPostIdRoute,
   LearnCourseIdRoute: LearnCourseIdRoute,
   EventsIndexRoute: EventsIndexRoute,

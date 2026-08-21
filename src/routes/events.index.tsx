@@ -251,7 +251,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
   const queryClient = useQueryClient();
   const submit = useServerFn(createEvent);
   const mutation = useMutation({
-    mutationFn: (vars: Parameters<typeof createEvent>[0] extends never ? never : {
+    mutationFn: (vars: {
       title: string;
       description: string;
       type: string;
