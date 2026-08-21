@@ -46,12 +46,10 @@ export function GlobalSearch() {
   function go(hit: SearchHit) {
     setOpen(false);
     setQuery("");
-    if (hit.kind === "term") navigate({ to: "/dictionary", search: { q: hit.title } as never });
+    if (hit.kind === "term") navigate({ to: "/dictionary" });
+    else if (hit.kind === "question" && hit.subtitle?.includes("CP Zone")) navigate({ to: "/cp-zone" });
     else if (hit.kind === "question")
-      navigate({
-        to: hit.subtitle?.includes("CP Zone") ? "/cp-zone" : "/practice",
-        search: { lang: "all", q: hit.title } as never,
-      });
+      navigate({ to: "/practice", search: { lang: "all", q: hit.title } });
     else if (hit.kind === "post") navigate({ to: "/forum/$postId", params: { postId: hit.id } });
     else navigate({ to: "/learn/$courseId", params: { courseId: hit.id } });
   }
