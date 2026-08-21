@@ -303,9 +303,10 @@ function Landing() {
                 >
                   <span className="inline-flex items-center gap-1.5 rounded-lg surface-tint px-2.5 py-1 text-xs font-semibold text-indigo-700">
                     <CalendarDays className="size-3.5" />
-                    {new Date(e.start_time).toLocaleDateString(undefined, {
+                    {new Date(e.start_time).toLocaleDateString("en-GB", {
                       month: "short",
                       day: "numeric",
+                      timeZone: "UTC",
                     })}
                   </span>
                   <h3 className="mt-4 text-lg">{e.title}</h3>

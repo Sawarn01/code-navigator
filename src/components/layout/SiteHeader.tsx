@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
+  { label: "Practice", to: "/practice" },
+  { label: "CP Zone", to: "/cp-zone" },
+  { label: "Leaderboard", to: "/leaderboard" },
   { label: "Dictionary", to: "/dictionary" },
   { label: "Reference", to: "/reference" },
   { label: "Forum", to: "/forum" },

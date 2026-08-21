@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CpZoneRouteImport } from './routes/cp-zone'
 import { Route as DictionaryRouteImport } from './routes/dictionary'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -35,9 +38,24 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CpZoneRoute = CpZoneRouteImport.update({
+  id: '/cp-zone',
+  path: '/cp-zone',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DictionaryRoute = DictionaryRouteImport.update({
   id: '/dictionary',
   path: '/dictionary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PracticeRoute = PracticeRouteImport.update({
+  id: '/practice',
+  path: '/practice',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReferenceRoute = ReferenceRouteImport.update({
@@ -80,7 +98,10 @@ const AuthenticatedProfileUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -92,7 +113,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -106,7 +130,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -120,7 +147,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/cp-zone'
     | '/dictionary'
+    | '/leaderboard'
+    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
@@ -132,7 +162,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/cp-zone'
     | '/dictionary'
+    | '/leaderboard'
+    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
@@ -145,7 +178,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/cp-zone'
     | '/dictionary'
+    | '/leaderboard'
+    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
@@ -159,7 +195,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CpZoneRoute: typeof CpZoneRoute
   DictionaryRoute: typeof DictionaryRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ForumPostIdRoute: typeof ForumPostIdRoute
@@ -189,11 +228,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cp-zone': {
+      id: '/cp-zone'
+      path: '/cp-zone'
+      fullPath: '/cp-zone'
+      preLoaderRoute: typeof CpZoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dictionary': {
       id: '/dictionary'
       path: '/dictionary'
       fullPath: '/dictionary'
       preLoaderRoute: typeof DictionaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/practice': {
+      id: '/practice'
+      path: '/practice'
+      fullPath: '/practice'
+      preLoaderRoute: typeof PracticeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reference': {
@@ -267,7 +327,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CpZoneRoute: CpZoneRoute,
   DictionaryRoute: DictionaryRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ForumPostIdRoute: ForumPostIdRoute,
