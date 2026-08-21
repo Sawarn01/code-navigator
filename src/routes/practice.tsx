@@ -142,7 +142,7 @@ function PracticePage() {
                     status === s ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-border text-muted-foreground"
                   }`}
                 >
-                  {s}
+                  {s === "all" ? "Any status" : s}
                 </button>
               ))}
             </div>
