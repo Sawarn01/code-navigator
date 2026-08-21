@@ -16,6 +16,10 @@ const catalogQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/practice")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    lang: typeof search.lang === "string" ? search.lang : "all",
+    q: typeof search.q === "string" ? search.q : "",
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(catalogQuery),
   head: () => ({
     meta: [
