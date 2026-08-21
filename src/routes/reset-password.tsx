@@ -34,8 +34,9 @@ function ResetPassword() {
       toast.error("Passwords do not match");
       return;
     }
-
+    setBusy(true);
     try {
+
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast.success("Password updated");
