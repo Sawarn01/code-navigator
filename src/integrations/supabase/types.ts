@@ -366,6 +366,8 @@ export type Database = {
           icon_url: string | null
           id: string
           name: string
+          piston_language: string | null
+          piston_version: string | null
           slug: string
         }
         Insert: {
@@ -373,6 +375,8 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name: string
+          piston_language?: string | null
+          piston_version?: string | null
           slug: string
         }
         Update: {
@@ -380,6 +384,8 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name?: string
+          piston_language?: string | null
+          piston_version?: string | null
           slug?: string
         }
         Relationships: []
@@ -423,9 +429,14 @@ export type Database = {
           difficulty: string
           id: string
           language_id: string | null
+          memory_limit_mb: number
           points: number
+          sample_table: string | null
           slug: string
+          sql_setup: string | null
           starter_code: string | null
+          tier: string | null
+          time_limit_ms: number
           title: string
           updated_at: string
         }
@@ -437,9 +448,14 @@ export type Database = {
           difficulty: string
           id?: string
           language_id?: string | null
+          memory_limit_mb?: number
           points?: number
+          sample_table?: string | null
           slug: string
+          sql_setup?: string | null
           starter_code?: string | null
+          tier?: string | null
+          time_limit_ms?: number
           title: string
           updated_at?: string
         }
@@ -451,9 +467,14 @@ export type Database = {
           difficulty?: string
           id?: string
           language_id?: string | null
+          memory_limit_mb?: number
           points?: number
+          sample_table?: string | null
           slug?: string
+          sql_setup?: string | null
           starter_code?: string | null
+          tier?: string | null
+          time_limit_ms?: number
           title?: string
           updated_at?: string
         }
@@ -509,6 +530,7 @@ export type Database = {
         Row: {
           code: string
           id: string
+          is_first_solve: boolean
           language: string | null
           points_awarded: number
           question_id: string | null
@@ -520,6 +542,7 @@ export type Database = {
         Insert: {
           code: string
           id?: string
+          is_first_solve?: boolean
           language?: string | null
           points_awarded?: number
           question_id?: string | null
@@ -531,6 +554,7 @@ export type Database = {
         Update: {
           code?: string
           id?: string
+          is_first_solve?: boolean
           language?: string | null
           points_awarded?: number
           question_id?: string | null
@@ -642,26 +666,23 @@ export type Database = {
       leaderboard: {
         Row: {
           avatar_url: string | null
+          badge_count: number | null
           full_name: string | null
+          month_points: number | null
           points: number | null
+          rank: number | null
+          solved_count: number | null
           user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          points?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          points?: number | null
-          user_id?: string | null
+          week_points: number | null
         }
         Relationships: []
       }
     }
     Functions: {
+      award_badge: {
+        Args: { _name: string; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
