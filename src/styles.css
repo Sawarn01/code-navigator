@@ -73,6 +73,13 @@
 
   --shadow-soft: 0 1px 2px oklch(0.36 0.14 279 / 0.04), 0 8px 24px oklch(0.36 0.14 279 / 0.06);
   --shadow-glow: 0 8px 32px oklch(0.51 0.23 277 / 0.22);
+  --gradient-hero: radial-gradient(
+      60% 60% at 20% 40%,
+      oklch(0.93 0.05 277 / 0.9) 0%,
+      transparent 70%
+    ),
+    radial-gradient(50% 60% at 80% 30%, oklch(0.9 0.07 290 / 0.8) 0%, transparent 70%);
+
 }
 
 :root {
