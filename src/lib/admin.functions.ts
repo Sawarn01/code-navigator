@@ -84,3 +84,45 @@ export const setUserRole = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export type LanguageRuntime = {
+  id: string;
+  name: string;
+  slug: string;
+  piston_language: string | null;
+  piston_version: string | null;
+};
+
+export const listRuntimes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<LanguageRuntime[]> => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("languages")
+      .select("id, name, slug, piston_language, piston_version")
+      .order("name");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const setRuntime = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string; piston_language: string; piston_version: string }) => ({
+    id: String(input.id),
+    piston_language: String(input.piston_language ?? "").trim().slice(0, 60),
+    piston_version: String(input.piston_version ?? "").trim().slice(0, 40),
+  }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("languages")
+      .update({
+        piston_language: data.piston_language || null,
+        piston_version: data.piston_version || null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

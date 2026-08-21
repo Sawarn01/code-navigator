@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { listUsers, setUserRole } from "@/lib/admin.functions";
+import { RuntimePanel } from "@/components/admin/RuntimePanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -113,6 +114,9 @@ function AdminPage() {
                 </table>
               </div>
             )}
+          </BentoCard>
+          <BentoCard className="lg:col-span-6">
+            <RuntimePanel />
           </BentoCard>
         </div>
       </main>
