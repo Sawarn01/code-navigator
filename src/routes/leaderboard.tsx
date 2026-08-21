@@ -174,10 +174,12 @@ function LeaderboardPage() {
   );
 
   const q = search.trim().toLowerCase();
-  const listRows = useMemo(
-    () => (q ? rows.filter((r) => (r.full_name ?? "").toLowerCase().includes(q)) : rows.slice(3)),
-    [rows, q],
-  );
+  const listRows = useMemo(() => {
+    if (q) return rows.filter((r) => (r.full_name ?? "").toLowerCase().includes(q));
+    // With three or fewer students the podium already shows everyone, but an
+    // empty table reads as "no data" — so keep listing every student instead.
+    return rows.length > 3 ? rows.slice(3) : rows;
+  }, [rows, q]);
 
   return (
     <div className="min-h-screen bg-background">
