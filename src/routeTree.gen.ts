@@ -17,6 +17,7 @@ import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
+import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +59,11 @@ const ForumIndexRoute = ForumIndexRouteImport.update({
   path: '/forum/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumPostIdRoute = ForumPostIdRouteImport.update({
+  id: '/forum/$postId',
+  path: '/forum/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedProfileUserIdRoute =
   AuthenticatedProfileUserIdRouteImport.update({
     id: '/profile/$userId',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/forum/$postId': typeof ForumPostIdRoute
   '/forum/': typeof ForumIndexRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/forum/$postId': typeof ForumPostIdRoute
   '/forum': typeof ForumIndexRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/forum/$postId': typeof ForumPostIdRoute
   '/forum/': typeof ForumIndexRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/forum/$postId'
     | '/forum/'
     | '/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/forum/$postId'
     | '/forum'
     | '/profile/$userId'
   id:
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/forum/$postId'
     | '/forum/'
     | '/_authenticated/profile/$userId'
   fileRoutesById: FileRoutesById
@@ -138,6 +150,7 @@ export interface RootRouteChildren {
   DictionaryRoute: typeof DictionaryRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ForumPostIdRoute: typeof ForumPostIdRoute
   ForumIndexRoute: typeof ForumIndexRoute
 }
 
@@ -199,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForumIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/$postId': {
+      id: '/forum/$postId'
+      path: '/forum/$postId'
+      fullPath: '/forum/$postId'
+      preLoaderRoute: typeof ForumPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/profile/$userId': {
       id: '/_authenticated/profile/$userId'
       path: '/profile/$userId'
@@ -229,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   DictionaryRoute: DictionaryRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ForumPostIdRoute: ForumPostIdRoute,
   ForumIndexRoute: ForumIndexRoute,
 }
 export const routeTree = rootRouteImport
