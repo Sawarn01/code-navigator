@@ -5,11 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
-  { label: "Practice", to: "/" },
-  { label: "Contests", to: "/" },
-  { label: "Courses", to: "/" },
-  { label: "Forum", to: "/" },
-];
+  { label: "Dictionary", to: "/dictionary" },
+  { label: "Reference", to: "/reference" },
+  { label: "Forum", to: "/forum" },
+] as const;
 
 export function SiteHeader() {
   const { isAuthenticated, role, user } = useAuth();
