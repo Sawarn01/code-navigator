@@ -86,7 +86,9 @@ export async function executeOnPiston(params: {
         stdin: params.stdin,
         run_timeout: params.timeoutMs,
         compile_timeout: 10000,
-        run_memory_limit: params.memoryMb * 1024 * 1024,
+        // Note: run_memory_limit is intentionally omitted — the self-hosted
+        // Piston instance enforces its own configured memory cap and rejects
+        // any explicit value above it with a 400.
       }),
     });
   } catch (e) {
