@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sync_forum_vote_counts() FROM PUBLIC, anon, authenticated;
