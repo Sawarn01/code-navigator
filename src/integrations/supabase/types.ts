@@ -691,6 +691,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      refresh_leaderboard: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "student" | "manager" | "admin"
