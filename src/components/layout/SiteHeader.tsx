@@ -1,5 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "Practice", to: "/" },
@@ -9,6 +12,24 @@ const navItems = [
 ];
 
 export function SiteHeader() {
+  const { isAuthenticated, role, user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  const initials = (user?.user_metadata?.["full_name"] as string | undefined)
+    ?.split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
     <motion.header
       initial={{ y: -24, opacity: 0 }}
@@ -41,16 +62,52 @@ export function SiteHeader() {
               </Link>
             </motion.div>
           ))}
+          {isAuthenticated && role === "admin" && (
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/admin"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-accent"
+              >
+                Admin
+              </Link>
+            </motion.div>
+          )}
         </nav>
 
-        <motion.button
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          type="button"
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-colors hover:bg-indigo-700"
-        >
-          Sign in
-        </motion.button>
+        {isAuthenticated ? (
+          <div className="flex items-center gap-2">
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/profile/$userId"
+                params={{ userId: "me" }}
+                className="flex items-center gap-2 rounded-xl surface-tint px-3 py-2 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
+              >
+                <span className="grid size-6 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground">
+                  {initials || "SP"}
+                </span>
+                Profile
+              </Link>
+            </motion.div>
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              type="button"
+              onClick={handleSignOut}
+              className="rounded-xl border border-input px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent"
+            >
+              Sign out
+            </motion.button>
+          </div>
+        ) : (
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+            <Link
+              to="/auth"
+              className="block rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-colors hover:bg-indigo-700"
+            >
+              Sign in
+            </Link>
+          </motion.div>
+        )}
       </div>
     </motion.header>
   );
