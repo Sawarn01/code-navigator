@@ -118,6 +118,29 @@ export function SiteHeader() {
           </motion.div>
         )}
       </div>
+
+      <div className="lg:hidden">
+        <div className="mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto px-4 pb-2 sm:px-6">
+          {navItems.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent"
+              activeProps={{ className: "bg-indigo-50 text-indigo-700" }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          {isAuthenticated && (role === "admin" || role === "manager") && (
+            <Link
+              to="/admin"
+              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-indigo-700"
+            >
+              Admin
+            </Link>
+          )}
+        </div>
+      </div>
     </motion.header>
   );
 }
