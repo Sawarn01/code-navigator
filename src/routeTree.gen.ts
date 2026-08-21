@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
+import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -64,6 +65,11 @@ const ForumPostIdRoute = ForumPostIdRouteImport.update({
   path: '/forum/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedForumNewRoute = AuthenticatedForumNewRouteImport.update({
+  id: '/forum/new',
+  path: '/forum/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileUserIdRoute =
   AuthenticatedProfileUserIdRouteImport.update({
     id: '/profile/$userId',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum/': typeof ForumIndexRoute
+  '/forum/new': typeof AuthenticatedForumNewRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
 export interface FileRoutesByTo {
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum': typeof ForumIndexRoute
+  '/forum/new': typeof AuthenticatedForumNewRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
 export interface FileRoutesById {
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum/': typeof ForumIndexRoute
+  '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
 export interface FileRouteTypes {
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/forum/$postId'
     | '/forum/'
+    | '/forum/new'
     | '/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/forum/$postId'
     | '/forum'
+    | '/forum/new'
     | '/profile/$userId'
   id:
     | '__root__'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/forum/$postId'
     | '/forum/'
+    | '/_authenticated/forum/new'
     | '/_authenticated/profile/$userId'
   fileRoutesById: FileRoutesById
 }
@@ -219,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForumPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/forum/new': {
+      id: '/_authenticated/forum/new'
+      path: '/forum/new'
+      fullPath: '/forum/new'
+      preLoaderRoute: typeof AuthenticatedForumNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile/$userId': {
       id: '/_authenticated/profile/$userId'
       path: '/profile/$userId'
@@ -231,11 +250,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedProfileUserIdRoute: typeof AuthenticatedProfileUserIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedProfileUserIdRoute: AuthenticatedProfileUserIdRoute,
 }
 
