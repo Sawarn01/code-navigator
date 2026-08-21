@@ -16,6 +16,10 @@ const catalogQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/practice")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    lang: typeof search["lang"] === "string" ? (search["lang"] as string) : "all",
+    q: typeof search["q"] === "string" ? (search["q"] as string) : "",
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(catalogQuery),
   head: () => ({
     meta: [
@@ -60,10 +64,11 @@ function PracticePage() {
   });
   const solved = useMemo(() => new Set(solvedData?.solved ?? []), [solvedData]);
 
-  const [language, setLanguage] = useState("all");
+  const initial = Route.useSearch();
+  const [language, setLanguage] = useState(initial.lang || "all");
   const [difficulty, setDifficulty] = useState<(typeof DIFFICULTIES)[number]>("all");
   const [status, setStatus] = useState<"all" | "solved" | "unsolved">("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initial.q ?? "");
 
   const filtered = useMemo(() => {
     const langId = data.languages.find((l) => l.slug === language)?.id;

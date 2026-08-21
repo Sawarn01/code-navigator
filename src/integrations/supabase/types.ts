@@ -62,27 +62,33 @@ export type Database = {
       course_lessons: {
         Row: {
           created_at: string
+          duration_minutes: number
           has_practice: boolean
           id: string
           order_index: number
+          practice_topic: string | null
           section_id: string
           title: string
           youtube_video_id: string | null
         }
         Insert: {
           created_at?: string
+          duration_minutes?: number
           has_practice?: boolean
           id?: string
           order_index?: number
+          practice_topic?: string | null
           section_id: string
           title: string
           youtube_video_id?: string | null
         }
         Update: {
           created_at?: string
+          duration_minutes?: number
           has_practice?: boolean
           id?: string
           order_index?: number
+          practice_topic?: string | null
           section_id?: string
           title?: string
           youtube_video_id?: string | null
@@ -204,6 +210,35 @@ export type Database = {
             columns: ["language_id"]
             isOneToOne: false
             referencedRelation: "languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_registrations: {
+        Row: {
+          event_id: string
+          id: string
+          registered_at: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          registered_at?: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          registered_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -389,6 +424,35 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

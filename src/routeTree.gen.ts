@@ -19,8 +19,12 @@ import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as EventsIndexRouteImport } from './routes/events.index'
+import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
 
@@ -73,6 +77,16 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForumIndexRoute = ForumIndexRouteImport.update({
   id: '/forum/',
   path: '/forum/',
@@ -81,6 +95,16 @@ const ForumIndexRoute = ForumIndexRouteImport.update({
 const ForumPostIdRoute = ForumPostIdRouteImport.update({
   id: '/forum/$postId',
   path: '/forum/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnCourseIdRoute = LearnCourseIdRouteImport.update({
+  id: '/learn/$courseId',
+  path: '/learn/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedForumNewRoute = AuthenticatedForumNewRouteImport.update({
@@ -105,8 +129,12 @@ export interface FileRoutesByFullPath {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
+  '/learn/$courseId': typeof LearnCourseIdRoute
+  '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -120,8 +148,12 @@ export interface FileRoutesByTo {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
+  '/learn/$courseId': typeof LearnCourseIdRoute
+  '/events': typeof EventsIndexRoute
   '/forum': typeof ForumIndexRoute
+  '/learn': typeof LearnIndexRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -137,8 +169,12 @@ export interface FileRoutesById {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
+  '/learn/$courseId': typeof LearnCourseIdRoute
+  '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
 }
@@ -154,8 +190,12 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
+    | '/learn/$courseId'
+    | '/events/'
     | '/forum/'
+    | '/learn/'
     | '/forum/new'
     | '/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
@@ -169,8 +209,12 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
+    | '/learn/$courseId'
+    | '/events'
     | '/forum'
+    | '/learn'
     | '/forum/new'
     | '/profile/$userId'
   id:
@@ -185,8 +229,12 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/events/$eventId'
     | '/forum/$postId'
+    | '/learn/$courseId'
+    | '/events/'
     | '/forum/'
+    | '/learn/'
     | '/_authenticated/forum/new'
     | '/_authenticated/profile/$userId'
   fileRoutesById: FileRoutesById
@@ -201,8 +249,12 @@ export interface RootRouteChildren {
   PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
   ForumPostIdRoute: typeof ForumPostIdRoute
+  LearnCourseIdRoute: typeof LearnCourseIdRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
+  LearnIndexRoute: typeof LearnIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -277,6 +329,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forum/': {
       id: '/forum/'
       path: '/forum'
@@ -289,6 +355,20 @@ declare module '@tanstack/react-router' {
       path: '/forum/$postId'
       fullPath: '/forum/$postId'
       preLoaderRoute: typeof ForumPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/$courseId': {
+      id: '/learn/$courseId'
+      path: '/learn/$courseId'
+      fullPath: '/learn/$courseId'
+      preLoaderRoute: typeof LearnCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/forum/new': {
@@ -333,8 +413,12 @@ const rootRouteChildren: RootRouteChildren = {
   PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
   ForumPostIdRoute: ForumPostIdRoute,
+  LearnCourseIdRoute: LearnCourseIdRoute,
+  EventsIndexRoute: EventsIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
+  LearnIndexRoute: LearnIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

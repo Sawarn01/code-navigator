@@ -3,10 +3,13 @@ import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { GlobalSearch } from "@/components/layout/GlobalSearch";
 
 const navItems = [
   { label: "Practice", to: "/practice" },
   { label: "CP Zone", to: "/cp-zone" },
+  { label: "Learn", to: "/learn" },
+  { label: "Events", to: "/events" },
   { label: "Leaderboard", to: "/leaderboard" },
   { label: "Dictionary", to: "/dictionary" },
   { label: "Reference", to: "/reference" },
@@ -39,7 +42,7 @@ export function SiteHeader() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur-md"
     >
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
           <motion.span
             whileHover={{ scale: 1.06, rotate: -3 }}
@@ -53,28 +56,32 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex">
           {navItems.map((item) => (
             <motion.div key={item.label} whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
               <Link
                 to={item.to}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 {item.label}
               </Link>
             </motion.div>
           ))}
-          {isAuthenticated && role === "admin" && (
+          {isAuthenticated && (role === "admin" || role === "manager") && (
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
               <Link
                 to="/admin"
-                className="rounded-lg px-3 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-accent"
+                className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
               >
                 Admin
               </Link>
             </motion.div>
           )}
         </nav>
+
+        <div className="hidden flex-1 justify-end md:flex">
+          <GlobalSearch />
+        </div>
 
         {isAuthenticated ? (
           <div className="flex items-center gap-2">
@@ -110,6 +117,29 @@ export function SiteHeader() {
             </Link>
           </motion.div>
         )}
+      </div>
+
+      <div className="lg:hidden">
+        <div className="mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto px-4 pb-2 sm:px-6">
+          {navItems.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent"
+              activeProps={{ className: "bg-indigo-50 text-indigo-700" }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          {isAuthenticated && (role === "admin" || role === "manager") && (
+            <Link
+              to="/admin"
+              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-indigo-700"
+            >
+              Admin
+            </Link>
+          )}
+        </div>
       </div>
     </motion.header>
   );
