@@ -11,8 +11,13 @@ type Period = "all" | "month" | "week";
 
 const boardQuery = (period: Period) =>
   queryOptions({
-    queryKey: ["leaderboard", period],
+    // Version the key so clients that cached the pre-refresh materialized-view
+    // response cannot keep showing zero points after the database was fixed.
+    queryKey: ["leaderboard", "live-v2", period],
     queryFn: () => getLeaderboard({ data: { period } }),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
   });
 
 export const Route = createFileRoute("/leaderboard")({
