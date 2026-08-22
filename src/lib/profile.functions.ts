@@ -26,6 +26,9 @@ export type ProfileData = {
   badges: { id: string; name: string; description: string | null; earned: boolean }[];
   submissions: ProfileSubmission[];
   languageProgress: { name: string; solved: number }[];
+  streak: number;
+  lastActiveDate: string | null;
+  activity: { date: string; count: number }[];
   usingSampleData: boolean;
 };
 
@@ -85,7 +88,7 @@ export const getProfile = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, bio, points, created_at")
+      .select("id, full_name, avatar_url, bio, points, created_at, streak_count, last_active_date")
       .eq("id", targetId)
       .maybeSingle();
 
@@ -134,6 +137,28 @@ export const getProfile = createServerFn({ method: "POST" })
 
     const usingSampleData = realSubs.length === 0;
 
+    // GitHub-style activity: accepted submissions per UTC day over the last 26 weeks.
+    const since = new Date(Date.now() - 183 * 86400000).toISOString();
+    const { data: activityRows } = await supabase
+      .from("submissions")
+      .select("submitted_at, status")
+      .eq("user_id", targetId)
+      .eq("status", "accepted")
+      .gte("submitted_at", since)
+      .limit(1000);
+
+    const counts = new Map<string, number>();
+    for (const row of activityRows ?? []) {
+      const day = String(row.submitted_at).slice(0, 10);
+      counts.set(day, (counts.get(day) ?? 0) + 1);
+    }
+    const activity = [...counts.entries()].map(([date, count]) => ({ date, count }));
+
+    const profileRow = profile as (typeof profile & {
+      streak_count?: number;
+      last_active_date?: string | null;
+    }) | null;
+
     return {
       isOwner,
       profile: profile ?? null,
@@ -142,6 +167,9 @@ export const getProfile = createServerFn({ method: "POST" })
       badges,
       submissions: usingSampleData ? SAMPLE_SUBMISSIONS : realSubs,
       languageProgress: SAMPLE_LANGUAGES,
+      streak: profileRow?.streak_count ?? 0,
+      lastActiveDate: profileRow?.last_active_date ?? null,
+      activity,
       usingSampleData,
     };
   });
