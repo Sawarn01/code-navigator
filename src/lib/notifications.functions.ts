@@ -79,7 +79,7 @@ export const getNotificationPrefs = createServerFn({ method: "POST" })
         .insert({ user_id: context.userId });
       return DEFAULT_PREFS;
     }
-    const row = data as Record<string, boolean>;
+    const row = data as unknown as Record<string, boolean>;
     const prefs = { ...DEFAULT_PREFS };
     for (const key of Object.keys(prefs) as (keyof NotificationPrefs)[]) {
       if (typeof row[key] === "boolean") prefs[key] = row[key];
