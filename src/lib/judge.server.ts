@@ -199,3 +199,65 @@ export async function recordSubmission(params: {
 
   return { firstSolve, pointsAwarded, newBadges };
 }
+
+/** Run arbitrary code against ad-hoc test cases (used by the admin question builder preview). */
+export async function runAdHoc(params: {
+  languageSlug: string;
+  code: string;
+  timeLimitMs: number;
+  memoryLimitMb: number;
+  sqlSetup: string | null;
+  tests: { input: string | null; expected_output: string | null }[];
+}): Promise<RunOutcome> {
+  const { languageSlug, code, timeLimitMs, memoryLimitMb, sqlSetup, tests } = params;
+  try {
+    const pseudo: QuestionRow = {
+      id: "preview",
+      title: "preview",
+      difficulty: "easy",
+      category: "practice",
+      points: 0,
+      language_id: null,
+      time_limit_ms: timeLimitMs,
+      memory_limit_mb: memoryLimitMb,
+      sql_setup: sqlSetup,
+    };
+    const { pistonLanguage, pistonVersion, source } = await buildExecution(
+      pseudo,
+      languageSlug,
+      code,
+    );
+    const results: TestResult[] = [];
+    let index = 0;
+    for (const t of tests) {
+      const exec = await executeOnPiston({
+        pistonLanguage,
+        pistonVersion,
+        source,
+        stdin: t.input ?? "",
+        timeoutMs: timeLimitMs,
+        memoryMb: memoryLimitMb,
+      });
+      const passed =
+        exec.status === "success" && normalize(exec.stdout) === normalize(t.expected_output ?? "");
+      results.push({
+        index: index++,
+        passed,
+        isSample: true,
+        input: t.input ?? "",
+        expected: t.expected_output ?? "",
+        actual: exec.stdout,
+        stderr: exec.stderr.slice(0, 2000),
+        status: exec.status,
+        timeMs: exec.time,
+        memoryKb: exec.memory ? Math.round(exec.memory / 1024) : null,
+      });
+    }
+    return { ok: true, results, allPassed: results.length > 0 && results.every((r) => r.passed) };
+  } catch (e) {
+    if (e instanceof ExecutionServiceError) {
+      return { ok: false, error: "service_unavailable", message: e.message };
+    }
+    throw e;
+  }
+}

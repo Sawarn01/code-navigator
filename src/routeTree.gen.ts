@@ -37,6 +37,7 @@ import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups.$groupId'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
 import { Route as PracticeTopicsIndexRouteImport } from './routes/practice.topics.index'
+import { Route as PracticeTopicsTopicSlugRouteImport } from './routes/practice.topics.$topicSlug'
 import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const IndexRoute = IndexRouteImport.update({
@@ -183,6 +184,11 @@ const PracticeTopicsIndexRoute = PracticeTopicsIndexRouteImport.update({
   path: '/practice/topics/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeTopicsTopicSlugRoute = PracticeTopicsTopicSlugRouteImport.update({
+  id: '/practice/topics/$topicSlug',
+  path: '/practice/topics/$topicSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksWeeklyDigestRoute =
   ApiPublicHooksWeeklyDigestRouteImport.update({
     id: '/api/public/hooks/weekly-digest',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics/': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics/': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/groups/'
     | '/practice/topics/'
     | '/api/public/hooks/weekly-digest'
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/groups'
     | '/practice/topics'
     | '/api/public/hooks/weekly-digest'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/_authenticated/groups/'
     | '/practice/topics/'
     | '/api/public/hooks/weekly-digest'
@@ -395,6 +407,7 @@ export interface RootRouteChildren {
   LearnIndexRoute: typeof LearnIndexRoute
   PathsIndexRoute: typeof PathsIndexRoute
   PracticeIndexRoute: typeof PracticeIndexRoute
+  PracticeTopicsTopicSlugRoute: typeof PracticeTopicsTopicSlugRoute
   PracticeTopicsIndexRoute: typeof PracticeTopicsIndexRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
@@ -597,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeTopicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice/topics/$topicSlug': {
+      id: '/practice/topics/$topicSlug'
+      path: '/practice/topics/$topicSlug'
+      fullPath: '/practice/topics/$topicSlug'
+      preLoaderRoute: typeof PracticeTopicsTopicSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weekly-digest': {
       id: '/api/public/hooks/weekly-digest'
       path: '/api/public/hooks/weekly-digest'
@@ -653,6 +673,7 @@ const rootRouteChildren: RootRouteChildren = {
   LearnIndexRoute: LearnIndexRoute,
   PathsIndexRoute: PathsIndexRoute,
   PracticeIndexRoute: PracticeIndexRoute,
+  PracticeTopicsTopicSlugRoute: PracticeTopicsTopicSlugRoute,
   PracticeTopicsIndexRoute: PracticeTopicsIndexRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
