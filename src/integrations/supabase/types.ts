@@ -890,6 +890,49 @@ export type Database = {
         }
         Relationships: []
       }
+      question_topics: {
+        Row: {
+          created_at: string
+          id: string
+          question_id: string
+          topic_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_id: string
+          topic_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_topics_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_topics_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_topics_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "user_topic_mastery"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           category: string
@@ -898,6 +941,7 @@ export type Database = {
           description: string
           difficulty: string
           id: string
+          is_archived: boolean
           language_id: string | null
           memory_limit_mb: number
           points: number
@@ -917,6 +961,7 @@ export type Database = {
           description: string
           difficulty: string
           id?: string
+          is_archived?: boolean
           language_id?: string | null
           memory_limit_mb?: number
           points?: number
@@ -936,6 +981,7 @@ export type Database = {
           description?: string
           difficulty?: string
           id?: string
+          is_archived?: boolean
           language_id?: string | null
           memory_limit_mb?: number
           points?: number
@@ -1376,6 +1422,39 @@ export type Database = {
           },
         ]
       }
+      topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          order_index: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          order_index?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          order_index?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           awarded_at: string
@@ -1439,6 +1518,20 @@ export type Database = {
           solved_count: number | null
           user_id: string | null
           week_points: number | null
+        }
+        Relationships: []
+      }
+      user_topic_mastery: {
+        Row: {
+          accepted_submissions: number | null
+          attempted: number | null
+          pass_rate: number | null
+          solved: number | null
+          submissions: number | null
+          topic_id: string | null
+          topic_name: string | null
+          topic_slug: string | null
+          user_id: string | null
         }
         Relationships: []
       }
