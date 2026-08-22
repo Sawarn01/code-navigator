@@ -14,6 +14,7 @@ const navItems = [
   { label: "Dictionary", to: "/dictionary" },
   { label: "Reference", to: "/reference" },
   { label: "Forum", to: "/forum" },
+  { label: "Groups", to: "/groups" },
 ] as const;
 
 export function SiteHeader() {
