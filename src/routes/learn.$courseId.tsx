@@ -72,9 +72,13 @@ function CourseDetailPage() {
 
   const mutation = useMutation({
     mutationFn: (vars: { lessonId: string; completed: boolean }) => markLesson({ data: vars }),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["lesson-progress"] });
       queryClient.invalidateQueries({ queryKey: ["course-progress"] });
+      if (result?.certificateCode) {
+        queryClient.invalidateQueries({ queryKey: ["my-certificates"] });
+        toast.success("Course complete — your certificate is ready!");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -88,9 +92,25 @@ function CourseDetailPage() {
   );
   const [activeLessonId, setActiveLessonId] = useState<string | null>(allLessons[0]?.id ?? null);
 
+  const activeLesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0] ?? null;
+
+  const fetchQuiz = useServerFn(getLessonQuiz);
+  const fetchAttempts = useServerFn(getMyQuizAttempts);
+  const { data: activeQuiz } = useQuery({
+    queryKey: ["lesson-quiz", activeLesson?.id ?? "none"],
+    queryFn: () => fetchQuiz({ data: { lessonId: activeLesson!.id } }),
+    enabled: Boolean(activeLesson),
+  });
+  const { data: attempts } = useQuery({
+    queryKey: ["quiz-attempts"],
+    queryFn: () => fetchAttempts(),
+    enabled: isAuthenticated,
+  });
+  const passedQuizIds = attempts?.passedQuizIds ?? [];
+  const quizLocked = Boolean(activeQuiz && !passedQuizIds.includes(activeQuiz.id));
+
   if (!course) return null;
 
-  const activeLesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0] ?? null;
   const doneCount = allLessons.filter((l) => completed.has(l.id)).length;
   const pct = allLessons.length ? Math.round((doneCount / allLessons.length) * 100) : 0;
 
