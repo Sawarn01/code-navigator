@@ -164,6 +164,117 @@ export function CourseBuilderPanel() {
         </motion.button>
       </div>
 
+      <div className="mt-4 overflow-hidden rounded-2xl border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-indigo-50/60 text-xs uppercase tracking-wide text-indigo-700">
+            <tr>
+              <th className="px-4 py-2">Course</th>
+              <th className="px-4 py-2">Lessons</th>
+              <th className="px-4 py-2">Learners</th>
+              <th className="px-4 py-2">Completion</th>
+              <th className="px-4 py-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {(catalog?.courses ?? []).map((c) => {
+              const s = impact?.stats.find((x) => x.course_id === c.id);
+              return (
+                <tr key={c.id} className="border-t border-border/70 hover:bg-accent/50">
+                  <td className="px-4 py-2 font-medium text-indigo-900">{c.title}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{s?.lessons ?? 0}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{s?.learners ?? 0}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{s?.completion_rate ?? 0}%</td>
+                  <td className="px-4 py-2">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => {
+                          setSelectedId(c.id);
+                          setMeta({ title: c.title, description: "", language_id: c.language_id ?? "" });
+                        }}
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget({ id: c.id, title: c.title })}
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {(catalog?.courses ?? []).length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                  No courses yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 grid place-items-center bg-indigo-950/40 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-md rounded-2xl border border-border bg-card p-6"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 size-5 text-amber-500" />
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-indigo-900">
+                    Delete “{deleteTarget.title}”?
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    This permanently removes the course along with{" "}
+                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.lessons ?? 0} lesson(s),
+                    all of its sections, quizzes, lesson resources and discussions, plus the saved
+                    progress of{" "}
+                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.learners ?? 0}{" "}
+                    enrolled learner(s) and any certificates issued for it. This cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const id = deleteTarget.id;
+                    setDeleteTarget(null);
+                    run.mutate(async () => {
+                      await removeCourse({ data: { courseId: id } });
+                      if (selectedId === id) setSelectedId(null);
+                      toast.success("Course deleted");
+                    });
+                  }}
+                  className="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white"
+                >
+                  Delete course
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+
       {course && (
         <div className="mt-6 space-y-5">
           <div className="rounded-2xl border border-border p-4">
