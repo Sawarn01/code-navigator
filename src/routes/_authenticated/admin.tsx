@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
@@ -61,6 +61,20 @@ function AdminPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Grant manager or admin access. Every new signup starts as a student.
           </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/admin/analytics"
+              className="rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-colors hover:bg-indigo-700"
+            >
+              Platform analytics
+            </Link>
+            <Link
+              to="/reporting"
+              className="rounded-xl border border-input px-3.5 py-2 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-50"
+            >
+              Student reporting
+            </Link>
+          </div>
         </motion.div>
 
         <div className="bento-grid mt-8">

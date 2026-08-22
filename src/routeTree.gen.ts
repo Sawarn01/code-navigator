@@ -20,6 +20,7 @@ import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
+import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
@@ -27,6 +28,7 @@ import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups.$groupId'
@@ -87,6 +89,11 @@ const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
   path: '/mentees',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReportingRoute = AuthenticatedReportingRouteImport.update({
+  id: '/reporting',
+  path: '/reporting',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -122,6 +129,12 @@ const LearnCourseIdRoute = LearnCourseIdRouteImport.update({
   path: '/learn/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin_/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedForumNewRoute = AuthenticatedForumNewRouteImport.update({
   id: '/forum/new',
   path: '/forum/new',
@@ -163,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -170,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -187,6 +202,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -194,6 +210,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -213,6 +230,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
+  '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -220,6 +238,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -239,6 +258,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/reporting'
     | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -246,6 +266,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
@@ -263,6 +284,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/reporting'
     | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -270,6 +292,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/forum'
     | '/learn'
+    | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
@@ -288,6 +311,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/mentees'
+    | '/_authenticated/reporting'
     | '/_authenticated/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -295,6 +319,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/_authenticated/admin_/analytics'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/profile/$userId'
@@ -400,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenteesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reporting': {
+      id: '/_authenticated/reporting'
+      path: '/reporting'
+      fullPath: '/reporting'
+      preLoaderRoute: typeof AuthenticatedReportingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -449,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin_/analytics': {
+      id: '/_authenticated/admin_/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/forum/new': {
       id: '/_authenticated/forum/new'
       path: '/forum/new'
@@ -490,7 +529,9 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
+  AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
   AuthenticatedProfileUserIdRoute: typeof AuthenticatedProfileUserIdRoute
@@ -500,7 +541,9 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
+  AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
   AuthenticatedProfileUserIdRoute: AuthenticatedProfileUserIdRoute,
