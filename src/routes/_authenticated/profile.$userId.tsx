@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { getProfile, updateProfile } from "@/lib/profile.functions";
+import { getUserCertificates } from "@/lib/lms.functions";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 
 export const Route = createFileRoute("/_authenticated/profile/$userId")({
