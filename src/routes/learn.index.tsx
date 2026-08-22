@@ -63,6 +63,12 @@ function LearnPage() {
     enabled: isAuthenticated,
   });
 
+  const fetchRatings = useServerFn(getCourseRatings);
+  const { data: ratings } = useQuery({
+    queryKey: ["course-ratings"],
+    queryFn: () => fetchRatings(),
+  });
+
   const [language, setLanguage] = useState("all");
 
   const languages = useMemo(() => {
