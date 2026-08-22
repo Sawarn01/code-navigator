@@ -38,7 +38,7 @@ export function PracticeExplorer({
   initialLanguage?: string;
   initialSearch?: string;
   lockedTopic?: string;
-  mode?: "practice" | "contest";
+  mode?: "practice" | "cp";
 }) {
   const { isAuthenticated } = useAuth();
   const fetchSolved = useServerFn(getSolvedQuestions);
