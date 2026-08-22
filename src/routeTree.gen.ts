@@ -22,12 +22,15 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as CertificateCertificateCodeRouteImport } from './routes/certificate.$certificateCode'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
+import { Route as PathsIndexRouteImport } from './routes/paths.index'
+import { Route as PathsPathIdRouteImport } from './routes/paths.$pathId'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
@@ -99,6 +102,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CertificateCertificateCodeRoute =
+  CertificateCertificateCodeRouteImport.update({
+    id: '/certificate/$certificateCode',
+    path: '/certificate/$certificateCode',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -127,6 +136,16 @@ const LearnIndexRoute = LearnIndexRouteImport.update({
 const LearnCourseIdRoute = LearnCourseIdRouteImport.update({
   id: '/learn/$courseId',
   path: '/learn/$courseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PathsIndexRoute = PathsIndexRouteImport.update({
+  id: '/paths/',
+  path: '/paths/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PathsPathIdRoute = PathsPathIdRouteImport.update({
+  id: '/paths/$pathId',
+  path: '/paths/$pathId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminAnalyticsRoute =
@@ -178,12 +197,15 @@ export interface FileRoutesByFullPath {
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
+  '/paths/$pathId': typeof PathsPathIdRoute
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/paths/': typeof PathsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -204,12 +226,15 @@ export interface FileRoutesByTo {
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
+  '/paths/$pathId': typeof PathsPathIdRoute
   '/events': typeof EventsIndexRoute
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
+  '/paths': typeof PathsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -232,12 +257,15 @@ export interface FileRoutesById {
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
+  '/paths/$pathId': typeof PathsPathIdRoute
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/paths/': typeof PathsIndexRoute
   '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -260,12 +288,15 @@ export interface FileRouteTypes {
     | '/mentees'
     | '/reporting'
     | '/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
+    | '/paths/$pathId'
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/paths/'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -286,12 +317,15 @@ export interface FileRouteTypes {
     | '/mentees'
     | '/reporting'
     | '/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
+    | '/paths/$pathId'
     | '/events'
     | '/forum'
     | '/learn'
+    | '/paths'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -313,12 +347,15 @@ export interface FileRouteTypes {
     | '/_authenticated/mentees'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
+    | '/paths/$pathId'
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/paths/'
     | '/_authenticated/admin_/analytics'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
@@ -337,12 +374,15 @@ export interface RootRouteChildren {
   PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  CertificateCertificateCodeRoute: typeof CertificateCertificateCodeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   ForumPostIdRoute: typeof ForumPostIdRoute
   LearnCourseIdRoute: typeof LearnCourseIdRoute
+  PathsPathIdRoute: typeof PathsPathIdRoute
   EventsIndexRoute: typeof EventsIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
+  PathsIndexRoute: typeof PathsIndexRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
@@ -439,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/certificate/$certificateCode': {
+      id: '/certificate/$certificateCode'
+      path: '/certificate/$certificateCode'
+      fullPath: '/certificate/$certificateCode'
+      preLoaderRoute: typeof CertificateCertificateCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -479,6 +526,20 @@ declare module '@tanstack/react-router' {
       path: '/learn/$courseId'
       fullPath: '/learn/$courseId'
       preLoaderRoute: typeof LearnCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paths/': {
+      id: '/paths/'
+      path: '/paths'
+      fullPath: '/paths/'
+      preLoaderRoute: typeof PathsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paths/$pathId': {
+      id: '/paths/$pathId'
+      path: '/paths/$pathId'
+      fullPath: '/paths/$pathId'
+      preLoaderRoute: typeof PathsPathIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin_/analytics': {
@@ -563,12 +624,15 @@ const rootRouteChildren: RootRouteChildren = {
   PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  CertificateCertificateCodeRoute: CertificateCertificateCodeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   ForumPostIdRoute: ForumPostIdRoute,
   LearnCourseIdRoute: LearnCourseIdRoute,
+  PathsPathIdRoute: PathsPathIdRoute,
   EventsIndexRoute: EventsIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
+  PathsIndexRoute: PathsIndexRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport

@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   BarChart3,
   UserCog,
+  Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +38,7 @@ const baseTabs: Tab[] = [
       { label: "Practice", to: "/practice", icon: Code2 },
       { label: "CP Zone", to: "/cp-zone", icon: Trophy },
       { label: "Learn", to: "/learn", icon: PlayCircle },
+      { label: "Paths", to: "/paths", icon: Layers },
     ],
   },
   {

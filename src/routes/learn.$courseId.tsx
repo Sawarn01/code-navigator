@@ -3,10 +3,12 @@ import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery }
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, PlayCircle } from "lucide-react";
+import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, Lock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { LessonQuiz } from "@/components/learn/LessonQuiz";
 import { getCourse, getMyLessonProgress, setLessonComplete } from "@/lib/learn.functions";
+import { getLessonQuiz, getMyQuizAttempts } from "@/lib/lms.functions";
 import { useAuth } from "@/hooks/useAuth";
 
 const courseQuery = (courseId: string) =>
@@ -70,9 +72,13 @@ function CourseDetailPage() {
 
   const mutation = useMutation({
     mutationFn: (vars: { lessonId: string; completed: boolean }) => markLesson({ data: vars }),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["lesson-progress"] });
       queryClient.invalidateQueries({ queryKey: ["course-progress"] });
+      if (result?.certificateCode) {
+        queryClient.invalidateQueries({ queryKey: ["my-certificates"] });
+        toast.success("Course complete — your certificate is ready!");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -86,9 +92,25 @@ function CourseDetailPage() {
   );
   const [activeLessonId, setActiveLessonId] = useState<string | null>(allLessons[0]?.id ?? null);
 
+  const activeLesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0] ?? null;
+
+  const fetchQuiz = useServerFn(getLessonQuiz);
+  const fetchAttempts = useServerFn(getMyQuizAttempts);
+  const { data: activeQuiz } = useQuery({
+    queryKey: ["lesson-quiz", activeLesson?.id ?? "none"],
+    queryFn: () => fetchQuiz({ data: { lessonId: activeLesson!.id } }),
+    enabled: Boolean(activeLesson),
+  });
+  const { data: attempts } = useQuery({
+    queryKey: ["quiz-attempts"],
+    queryFn: () => fetchAttempts(),
+    enabled: isAuthenticated,
+  });
+  const passedQuizIds = attempts?.passedQuizIds ?? [];
+  const quizLocked = Boolean(activeQuiz && !passedQuizIds.includes(activeQuiz.id));
+
   if (!course) return null;
 
-  const activeLesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0] ?? null;
   const doneCount = allLessons.filter((l) => completed.has(l.id)).length;
   const pct = allLessons.length ? Math.round((doneCount / allLessons.length) * 100) : 0;
 
@@ -258,23 +280,36 @@ function CourseDetailPage() {
                       )}
                       {isAuthenticated ? (
                         <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          disabled={mutation.isPending}
+                          whileHover={{ scale: quizLocked ? 1 : 1.03 }}
+                          whileTap={{ scale: quizLocked ? 1 : 0.97 }}
+                          disabled={mutation.isPending || (quizLocked && !completed.has(activeLesson.id))}
+                          title={
+                            quizLocked && !completed.has(activeLesson.id)
+                              ? "Pass the lesson quiz to unlock completion"
+                              : undefined
+                          }
                           onClick={() =>
                             mutation.mutate({
                               lessonId: activeLesson.id,
                               completed: !completed.has(activeLesson.id),
                             })
                           }
-                          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                             completed.has(activeLesson.id)
                               ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "bg-primary text-primary-foreground hover:bg-indigo-700"
                           }`}
                         >
-                          <CheckCircle2 className="size-4" />
-                          {completed.has(activeLesson.id) ? "Completed" : "Mark complete"}
+                          {quizLocked && !completed.has(activeLesson.id) ? (
+                            <Lock className="size-4" />
+                          ) : (
+                            <CheckCircle2 className="size-4" />
+                          )}
+                          {completed.has(activeLesson.id)
+                            ? "Completed"
+                            : quizLocked
+                              ? "Pass quiz to complete"
+                              : "Mark complete"}
                         </motion.button>
                       ) : (
                         <Link
@@ -286,6 +321,18 @@ function CourseDetailPage() {
                       )}
                     </div>
                   </div>
+
+                  {activeQuiz && (
+                    <div className="mt-6 border-t border-border pt-6">
+                      <LessonQuiz
+                        lessonId={activeLesson.id}
+                        passedQuizIds={passedQuizIds}
+                        onPassed={() => {
+                          queryClient.invalidateQueries({ queryKey: ["quiz-attempts"] });
+                        }}
+                      />
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
