@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { motion, useInView, animate } from "framer-motion";
+import { motion, useInView, animate, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
   BookOpen,
@@ -13,6 +13,7 @@ import {
   MessagesSquare,
   CalendarDays,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
@@ -127,6 +128,79 @@ const testimonials = [
     role: "Year 4 · CS",
   },
 ];
+
+const languages = [
+  "JavaScript",
+  "Python",
+  "Java",
+  "C++",
+  "C",
+  "TypeScript",
+  "Go",
+  "SQL",
+];
+
+const steps = [
+  { title: "Pick a track", desc: "Choose a language and a difficulty that stretches you." },
+  { title: "Solve & submit", desc: "Write code in-browser and run it against hidden tests." },
+  { title: "Earn points", desc: "Every accepted solution feeds your streak, badges and rank." },
+  { title: "Compete", desc: "Take that form into timed CP rounds and hackathon weekends." },
+];
+
+const faqs = [
+  {
+    q: "Who can join Space?",
+    a: "Space is open to students with a school email address. Sign up takes under a minute.",
+  },
+  {
+    q: "Which languages are supported?",
+    a: "JavaScript, TypeScript, Python, Java, C, C++, Go and SQL — all executed on our own runners.",
+  },
+  {
+    q: "How are points calculated?",
+    a: "Easy problems award 50 points, medium 100 and hard 200. Points feed the global leaderboard.",
+  },
+  {
+    q: "Do I need a team for hackathons?",
+    a: "No. You can register solo and form or join a team from the event page at any time.",
+  },
+];
+
+function FaqItem({ faq, delay }: { faq: { q: string; a: string }; delay: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, delay }}
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)] transition-colors hover:border-indigo-200"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-indigo-900"
+      >
+        {faq.q}
+        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }}>
+          <Plus className="size-4 text-indigo-600" />
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <p className="px-5 pb-4 text-sm text-muted-foreground">{faq.a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -274,8 +348,116 @@ function Landing() {
           </div>
         </section>
 
-        {/* Upcoming hackathons */}
+        {/* Languages marquee */}
+        <section className="overflow-hidden border-y border-border surface-tint py-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex gap-4"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 22, ease: "linear", repeat: Infinity }}
+          >
+            {[...languages, ...languages].map((lang, i) => (
+              <span
+                key={`${lang}-${i}`}
+                className="whitespace-nowrap rounded-xl border border-indigo-100 bg-card px-5 py-2 text-sm font-semibold text-indigo-700 shadow-[var(--shadow-soft)]"
+              >
+                {lang}
+              </span>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* How it works */}
+        <section id="how-it-works" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl sm:text-4xl"
+          >
+            How Space works
+          </motion.h2>
+          <div className="mt-10 grid gap-4 md:grid-cols-4">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -6 }}
+                className="relative rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] transition-colors hover:border-indigo-200"
+              >
+                <span className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-bold text-primary-foreground">
+                  {i + 1}
+                </span>
+                <h3 className="mt-4 text-lg">{step.title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Live-feel practice preview */}
         <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6">
+          <div className="grid items-center gap-8 rounded-2xl border border-indigo-100 surface-tint p-6 sm:p-10 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl sm:text-4xl">Write it. Run it. Get judged instantly.</h2>
+              <p className="mt-3 text-muted-foreground">
+                Every problem runs against hidden test cases in seconds, with runtime feedback and
+                points awarded the moment you pass.
+              </p>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-6 inline-block">
+                <Link
+                  to="/auth"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-colors hover:bg-indigo-700"
+                >
+                  Start solving <ArrowRight className="size-4" />
+                </Link>
+              </motion.div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              whileHover={{ y: -6, rotate: -0.4 }}
+              className="rounded-2xl border border-border bg-card p-5 font-mono text-[13px] shadow-[var(--shadow-soft)]"
+            >
+              <div className="flex gap-1.5">
+                <span className="size-2.5 rounded-full bg-indigo-200" />
+                <span className="size-2.5 rounded-full bg-indigo-300" />
+                <span className="size-2.5 rounded-full bg-indigo-400" />
+              </div>
+              <pre className="mt-4 overflow-x-auto leading-relaxed text-indigo-900">{`def two_sum(nums, target):
+    seen = {}
+    for i, n in enumerate(nums):
+        if target - n in seen:
+            return [seen[target - n], i]
+        seen[n] = i`}</pre>
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.9 }}
+                className="mt-4 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700"
+              >
+                ✓ Accepted · 12 ms · +100 points
+              </motion.p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Upcoming hackathons */}
+        <section id="hackathons" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 pb-20 sm:px-6">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -321,7 +503,7 @@ function Landing() {
         </section>
 
         {/* Why Space */}
-        <section className="border-y border-border surface-tint">
+        <section id="stories" className="scroll-mt-20 border-y border-border surface-tint">
           <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -350,6 +532,24 @@ function Landing() {
                 </motion.blockquote>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-20 sm:px-6">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl sm:text-4xl"
+          >
+            Questions, answered
+          </motion.h2>
+          <div className="mt-8 space-y-3">
+            {faqs.map((f, i) => (
+              <FaqItem key={f.q} faq={f} delay={i * 0.06} />
+            ))}
           </div>
         </section>
       </main>
