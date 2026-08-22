@@ -224,8 +224,22 @@ export function PracticeExplorer({
             </motion.li>
           ))}
           {filtered.length === 0 && (
-            <li className="py-8 text-center text-sm text-muted-foreground">No problems match.</li>
+            <li className="space-y-2 py-8 text-center text-sm text-muted-foreground">
+              <p>No problems match{search ? ` “${search}”` : ""}.</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setDifficulty("all");
+                  setStatus("all");
+                  if (!lockedTopic) setTopic("all");
+                }}
+                className="rounded-xl surface-tint px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+              >
+                Clear filters
+              </button>
+            </li>
           )}
+
         </ul>
       </aside>
 
