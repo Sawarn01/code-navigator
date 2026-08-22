@@ -333,6 +333,13 @@ function CourseDetailPage() {
                       />
                     </div>
                   )}
+
+                  <div className="mt-6 border-t border-border pt-6">
+                    <LessonDiscussion
+                      lessonId={activeLesson.id}
+                      currentUserId={user?.id ?? null}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
