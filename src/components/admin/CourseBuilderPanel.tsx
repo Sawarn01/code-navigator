@@ -512,7 +512,10 @@ function ResourceForm({
       </select>
       <button
         onClick={() => {
-          if (!title.trim() || !url.trim()) return toast.error("Title and URL are required");
+          if (!title.trim() || !url.trim()) {
+            toast.error("Title and URL are required");
+            return;
+          }
           onAdd({ title: title.trim(), file_url: url.trim(), type });
           setTitle("");
           setUrl("");
