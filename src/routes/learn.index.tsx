@@ -7,6 +7,8 @@ import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { getCourses, getMyCourseProgress } from "@/lib/learn.functions";
+import { getCourseRatings } from "@/lib/course-social.functions";
+import { StarRow } from "@/components/learn/CourseReviews";
 import { useAuth } from "@/hooks/useAuth";
 
 const coursesQuery = queryOptions({
