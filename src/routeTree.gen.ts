@@ -27,6 +27,7 @@ import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups.$groupId'
@@ -122,6 +123,12 @@ const LearnCourseIdRoute = LearnCourseIdRouteImport.update({
   path: '/learn/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin_/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedForumNewRoute = AuthenticatedForumNewRouteImport.update({
   id: '/forum/new',
   path: '/forum/new',
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/forum'
     | '/learn'
+    | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/_authenticated/admin_/analytics'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/profile/$userId'
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin_/analytics': {
+      id: '/_authenticated/admin_/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/forum/new': {
       id: '/_authenticated/forum/new'
       path: '/forum/new'
@@ -491,6 +511,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
   AuthenticatedProfileUserIdRoute: typeof AuthenticatedProfileUserIdRoute
@@ -501,6 +522,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
   AuthenticatedProfileUserIdRoute: AuthenticatedProfileUserIdRoute,
