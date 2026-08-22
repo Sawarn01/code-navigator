@@ -210,7 +210,7 @@ function ProfilePage() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-4">
                   <Link
                     to="/practice"
-                    search={{}}
+                    search={{ lang: "all", q: "" }}
                     className="inline-block rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-indigo-700"
                   >
                     Practice now
