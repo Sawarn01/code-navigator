@@ -135,6 +135,9 @@ function AdminPage() {
             <RuntimePanel />
           </BentoCard>
           <BentoCard className="lg:col-span-12">
+            <CourseBuilderPanel />
+          </BentoCard>
+          <BentoCard className="lg:col-span-12">
             <MentorPanel />
           </BentoCard>
         </div>
