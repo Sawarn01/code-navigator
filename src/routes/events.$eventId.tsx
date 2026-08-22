@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { getEvent, getMyRegistrations, toggleRegistration } from "@/lib/events.functions";
 import { eventMeta, formatEventDate } from "@/components/events/event-style";
+import { TeamPanel } from "@/components/events/TeamPanel";
 import { useAuth } from "@/hooks/useAuth";
 
 const eventQuery = (eventId: string) =>
@@ -187,6 +188,10 @@ function EventDetailPage() {
             </a>
           )}
         </div>
+
+        {["mini-hackathon", "saturday-day", "saturday-night"].includes(event.type) && (
+          <TeamPanel eventId={eventId} />
+        )}
       </main>
     </div>
   );
