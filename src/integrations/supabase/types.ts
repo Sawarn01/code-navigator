@@ -509,6 +509,78 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          badge_earned: boolean
+          created_at: string
+          email_digest: boolean
+          event_reminder: boolean
+          forum_reply: boolean
+          group_invite: boolean
+          mentor_note: boolean
+          streak_risk: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_earned?: boolean
+          created_at?: string
+          email_digest?: boolean
+          event_reminder?: boolean
+          forum_reply?: boolean
+          group_invite?: boolean
+          mentor_note?: boolean
+          streak_risk?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_earned?: boolean
+          created_at?: string
+          email_digest?: boolean
+          event_reminder?: boolean
+          forum_reply?: boolean
+          group_invite?: boolean
+          mentor_note?: boolean
+          streak_risk?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -516,7 +588,9 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          last_active_date: string | null
           points: number
+          streak_count: number
           updated_at: string
         }
         Insert: {
@@ -525,7 +599,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          last_active_date?: string | null
           points?: number
+          streak_count?: number
           updated_at?: string
         }
         Update: {
@@ -534,7 +610,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          last_active_date?: string | null
           points?: number
+          streak_count?: number
           updated_at?: string
         }
         Relationships: []
@@ -1008,6 +1086,16 @@ export type Database = {
         Args: { _name: string; _user_id: string }
         Returns: undefined
       }
+      create_notification: {
+        Args: {
+          _body?: string
+          _link?: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       gen_invite_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1021,7 +1109,9 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      notify_streak_risk: { Args: never; Returns: undefined }
       refresh_leaderboard: { Args: never; Returns: undefined }
+      reset_broken_streaks: { Args: never; Returns: undefined }
       seed_question: {
         Args: {
           _category: string
