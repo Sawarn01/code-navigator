@@ -176,7 +176,7 @@ export const getPlatformAnalytics = createServerFn({ method: "POST" })
       if (solvedPairs.has(key)) continue;
       solvedPairs.add(key);
       const d = difficultyById.get(s.question_id);
-      if (d && d in diffCount) diffCount[d] += 1;
+      if (d && d in diffCount) diffCount[d] = (diffCount[d] ?? 0) + 1;
     }
 
     const difficultyDistribution: NamedCount[] = [
