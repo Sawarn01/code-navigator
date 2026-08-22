@@ -325,9 +325,11 @@ function CourseDetailPage() {
                   {activeQuiz && (
                     <div className="mt-6 border-t border-border pt-6">
                       <LessonQuiz
-                        quiz={activeQuiz}
-                        passed={passedQuizIds.includes(activeQuiz.id)}
-                        languageSlug={course.language_slug}
+                        lessonId={activeLesson.id}
+                        passedQuizIds={passedQuizIds}
+                        onPassed={() => {
+                          queryClient.invalidateQueries({ queryKey: ["quiz-attempts"] });
+                        }}
                       />
                     </div>
                   )}
