@@ -344,3 +344,63 @@ export const deleteResource = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export type CourseImpact = {
+  course_id: string;
+  lessons: number;
+  learners: number;
+  completion_rate: number;
+};
+
+/** Enrollment + completion stats so staff can see the impact before deleting a course. */
+export const getCourseImpact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ stats: CourseImpact[] }> => {
+    await assertStaff(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: sections }, { data: lessons }, { data: progress }] = await Promise.all([
+      supabaseAdmin.from("course_sections").select("id, course_id").limit(5000),
+      supabaseAdmin.from("course_lessons").select("id, section_id").limit(10000),
+      supabaseAdmin.from("lesson_progress").select("user_id, lesson_id").limit(50000),
+    ]);
+
+    const courseBySection = new Map((sections ?? []).map((s) => [s.id, s.course_id] as const));
+    const courseByLesson = new Map<string, string>();
+    const lessonsPerCourse = new Map<string, number>();
+    for (const l of lessons ?? []) {
+      const courseId = courseBySection.get(l.section_id);
+      if (!courseId) continue;
+      courseByLesson.set(l.id, courseId);
+      lessonsPerCourse.set(courseId, (lessonsPerCourse.get(courseId) ?? 0) + 1);
+    }
+
+    const doneByCourseUser = new Map<string, number>();
+    for (const p of progress ?? []) {
+      const courseId = courseByLesson.get(p.lesson_id);
+      if (!courseId) continue;
+      const key = `${courseId}|${p.user_id}`;
+      doneByCourseUser.set(key, (doneByCourseUser.get(key) ?? 0) + 1);
+    }
+
+    const learners = new Map<string, number>();
+    const finishers = new Map<string, number>();
+    for (const [key, done] of doneByCourseUser) {
+      const courseId = key.split("|")[0]!;
+      learners.set(courseId, (learners.get(courseId) ?? 0) + 1);
+      const total = lessonsPerCourse.get(courseId) ?? 0;
+      if (total > 0 && done >= total) finishers.set(courseId, (finishers.get(courseId) ?? 0) + 1);
+    }
+
+    return {
+      stats: [...lessonsPerCourse.keys()].map((courseId) => {
+        const l = learners.get(courseId) ?? 0;
+        return {
+          course_id: courseId,
+          lessons: lessonsPerCourse.get(courseId) ?? 0,
+          learners: l,
+          completion_rate: l ? Math.round((100 * (finishers.get(courseId) ?? 0)) / l) : 0,
+        };
+      }),
+    };
+  });
