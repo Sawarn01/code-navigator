@@ -20,6 +20,7 @@ import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
+import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
@@ -86,6 +87,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
   id: '/mentees',
   path: '/mentees',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportingRoute = AuthenticatedReportingRouteImport.update({
+  id: '/reporting',
+  path: '/reporting',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
+  '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/reporting'
     | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/reporting'
     | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/mentees'
+    | '/_authenticated/reporting'
     | '/_authenticated/settings'
     | '/events/$eventId'
     | '/forum/$postId'
@@ -413,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenteesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reporting': {
+      id: '/_authenticated/reporting'
+      path: '/reporting'
+      fullPath: '/reporting'
+      preLoaderRoute: typeof AuthenticatedReportingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -510,6 +529,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
+  AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
@@ -521,6 +541,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
+  AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,

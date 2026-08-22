@@ -81,6 +81,24 @@ export function SiteHeader() {
               </motion.div>
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
                 <Link
+                  to="/reporting"
+                  className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
+                >
+                  Reporting
+                </Link>
+              </motion.div>
+              {role === "admin" && (
+                <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
+                  <Link
+                    to="/admin/analytics"
+                    className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
+                  >
+                    Analytics
+                  </Link>
+                </motion.div>
+              )}
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
+                <Link
                   to="/admin"
                   className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
                 >
@@ -161,12 +179,20 @@ export function SiteHeader() {
             </Link>
           )}
           {isAuthenticated && (role === "admin" || role === "manager") && (
-            <Link
-              to="/admin"
-              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-indigo-700"
-            >
-              Admin
-            </Link>
+            <>
+              <Link
+                to="/reporting"
+                className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-indigo-700"
+              >
+                Reporting
+              </Link>
+              <Link
+                to="/admin"
+                className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-indigo-700"
+              >
+                Admin
+              </Link>
+            </>
           )}
         </div>
       </div>
