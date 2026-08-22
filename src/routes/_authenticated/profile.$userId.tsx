@@ -256,6 +256,33 @@ function ProfilePage() {
               </div>
             </BentoCard>
 
+            <BentoCard className="lg:col-span-6" delay={0.16}>
+              <h2 className="text-lg">Certificates</h2>
+              {certificates?.length ? (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {certificates.map((c) => (
+                    <motion.div key={c.code} whileHover={{ y: -3 }}>
+                      <Link
+                        to="/certificate/$certificateCode"
+                        params={{ certificateCode: c.code }}
+                        className="block rounded-2xl border border-indigo-100 surface-tint p-4 transition-colors hover:bg-indigo-100"
+                      >
+                        <p className="text-sm font-semibold text-indigo-900">{c.course_title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Issued {new Date(c.issued_at).toLocaleDateString()}
+                        </p>
+                        <p className="mt-2 font-mono text-[11px] text-indigo-700">{c.code}</p>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No certificates yet — finish every lesson and quiz in a course to earn one.
+                </p>
+              )}
+            </BentoCard>
+
             <BentoCard className="lg:col-span-2" delay={0.18}>
               <h2 className="text-lg">Languages practiced</h2>
               <div className="mt-4 space-y-3">
