@@ -18,6 +18,7 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -83,6 +84,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/dashboard'
     | '/mentees'
     | '/reporting'
     | '/settings'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/dashboard'
     | '/mentees'
     | '/reporting'
     | '/settings'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/_authenticated/dashboard'
     | '/_authenticated/mentees'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
@@ -488,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/mentees': {
@@ -649,6 +668,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
   AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -662,6 +682,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
   AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

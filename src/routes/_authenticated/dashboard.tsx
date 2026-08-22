@@ -139,7 +139,7 @@ function StudentView() {
     queryFn: () => fetchNotifications(),
   });
 
-  const enrolled = (courses?.courses ?? [])
+  const enrolled = (courses ?? [])
     .filter((c) => (progress?.byCourse[c.id] ?? 0) > 0)
     .slice(0, 4);
   const upcoming = (events?.events ?? [])
@@ -254,13 +254,13 @@ function StudentView() {
       <BentoCard>
         <h2 className="text-lg font-semibold text-indigo-900">Recent notifications</h2>
         <ul className="mt-3 space-y-2 text-sm">
-          {(notifications?.notifications ?? []).slice(0, 5).map((n) => (
+          {(notifications?.items ?? []).slice(0, 5).map((n) => (
             <li key={n.id} className="rounded-xl bg-indigo-50/60 px-3 py-2">
               <p className="font-medium text-indigo-900">{n.title}</p>
               {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
             </li>
           ))}
-          {(notifications?.notifications ?? []).length === 0 && (
+          {(notifications?.items ?? []).length === 0 && (
             <li className="text-sm text-muted-foreground">You&apos;re all caught up.</li>
           )}
         </ul>
@@ -279,7 +279,7 @@ function ManagerView() {
     queryFn: () => fetchReport(),
   });
 
-  const list = mentees?.mentees ?? [];
+  const list = mentees ?? [];
   const avg = (nums: number[]) =>
     nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : 0;
 
