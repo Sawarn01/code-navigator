@@ -193,6 +193,14 @@ function ProfilePage() {
               </p>
             </BentoCard>
 
+            <BentoCard className="lg:col-span-2" delay={0.11}>
+              <p className="text-sm font-medium text-muted-foreground">CP rating</p>
+              <p className="mt-3 font-display text-4xl font-bold text-indigo-900">
+                {data?.cpRating ?? 1200}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">Rises with each CP Zone solve</p>
+            </BentoCard>
+
             <BentoCard className="lg:col-span-2" delay={0.12}>
               <p className="text-sm font-medium text-muted-foreground">Current streak</p>
               <div className="mt-3 flex items-baseline gap-2">
@@ -214,7 +222,11 @@ function ProfilePage() {
                   : "Solve one today to keep your streak."}
               </p>
               {!solvedToday && (
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-4">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="mt-4"
+                >
                   <Link
                     to="/practice"
                     search={{ lang: "all", q: "" }}

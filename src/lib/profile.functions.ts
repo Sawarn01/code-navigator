@@ -30,6 +30,7 @@ export type ProfileData = {
   lastActiveDate: string | null;
   activity: { date: string; count: number }[];
   usingSampleData: boolean;
+  cpRating: number;
 };
 
 const SAMPLE_SUBMISSIONS: ProfileSubmission[] = [
@@ -88,7 +89,9 @@ export const getProfile = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, bio, points, created_at, streak_count, last_active_date")
+      .select(
+        "id, full_name, avatar_url, bio, points, created_at, streak_count, last_active_date, cp_rating",
+      )
       .eq("id", targetId)
       .maybeSingle();
 
@@ -107,7 +110,9 @@ export const getProfile = createServerFn({ method: "POST" })
       isOwner
         ? supabase
             .from("submissions")
-            .select("id, status, points_awarded, submitted_at, language, questions(title, difficulty)")
+            .select(
+              "id, status, points_awarded, submitted_at, language, questions(title, difficulty)",
+            )
             .eq("user_id", targetId)
             .order("submitted_at", { ascending: false })
             .limit(8)
@@ -154,10 +159,13 @@ export const getProfile = createServerFn({ method: "POST" })
     }
     const activity = [...counts.entries()].map(([date, count]) => ({ date, count }));
 
-    const profileRow = profile as (typeof profile & {
-      streak_count?: number;
-      last_active_date?: string | null;
-    }) | null;
+    const profileRow = profile as
+      | (typeof profile & {
+          streak_count?: number;
+          last_active_date?: string | null;
+          cp_rating?: number;
+        })
+      | null;
 
     return {
       isOwner,
@@ -171,15 +179,45 @@ export const getProfile = createServerFn({ method: "POST" })
       lastActiveDate: profileRow?.last_active_date ?? null,
       activity,
       usingSampleData,
+      cpRating: profileRow?.cp_rating ?? 1200,
     };
+  });
+
+export const getLeaderboardVisibility = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ optedOut: boolean }> => {
+    const { data } = await context.supabase
+      .from("profiles")
+      .select("leaderboard_opt_out")
+      .eq("id", context.userId)
+      .maybeSingle();
+    return { optedOut: data?.leaderboard_opt_out ?? false };
+  });
+
+export const setLeaderboardVisibility = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { optedOut: boolean }) => ({ optedOut: Boolean(input.optedOut) }))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ leaderboard_opt_out: data.optedOut })
+      .eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true, optedOut: data.optedOut };
   });
 
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { full_name: string; bio: string; avatar_url: string }) => ({
-    full_name: String(input.full_name ?? "").trim().slice(0, 100),
-    bio: String(input.bio ?? "").trim().slice(0, 500),
-    avatar_url: String(input.avatar_url ?? "").trim().slice(0, 500),
+    full_name: String(input.full_name ?? "")
+      .trim()
+      .slice(0, 100),
+    bio: String(input.bio ?? "")
+      .trim()
+      .slice(0, 500),
+    avatar_url: String(input.avatar_url ?? "")
+      .trim()
+      .slice(0, 500),
   }))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase

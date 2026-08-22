@@ -12,6 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Default build target is Cloudflare Workers; override for a self-hosted Node VPS (Hostinger).
+  nitro: {
+    preset: "node-server",
+  },
   vite: {
     optimizeDeps: {
       include: ["@uiw/react-codemirror", "react", "react-dom", "react-dom/client"],

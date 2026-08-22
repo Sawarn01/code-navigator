@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { MessagesSquare, ArrowBigUp, MessageCircle, PenLine } from "lucide-react";
+import { MessagesSquare, ArrowBigUp, BadgeCheck, MessageCircle, PenLine, Tag } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { listForumPosts } from "@/lib/forum.functions";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,16 +52,25 @@ function ForumIndex() {
   const { data } = useSuspenseQuery(forumQuery);
   const { isAuthenticated } = useAuth();
   const [sort, setSort] = useState<"new" | "top">("new");
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+
+  const tags = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const post of data)
+      for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  }, [data]);
 
   const posts = useMemo(() => {
-    const copy = [...data];
+    const filtered = tagFilter ? data.filter((p) => p.tags.includes(tagFilter)) : data;
+    const copy = [...filtered];
     copy.sort((a, b) =>
       sort === "top"
         ? b.upvotes - a.upvotes
         : new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
     return copy;
-  }, [data, sort]);
+  }, [data, sort, tagFilter]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -113,6 +122,26 @@ function ForumIndex() {
           ))}
         </div>
 
+        {tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Tag className="size-3.5 text-muted-foreground" />
+            {tags.map(([tag, count]) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setTagFilter((t) => (t === tag ? null : tag))}
+                className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+                  tagFilter === tag
+                    ? "bg-primary text-primary-foreground"
+                    : "surface-tint text-indigo-700 hover:bg-indigo-100"
+                }`}
+              >
+                {tag} · {count}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="mt-6 space-y-4">
           <AnimatePresence mode="popLayout">
             {posts.map((post, index) => (
@@ -126,19 +155,22 @@ function ForumIndex() {
                 whileHover={{ y: -3 }}
                 className="bento-card"
               >
-                <Link
-                  to="/forum/$postId"
-                  params={{ postId: post.id }}
-                  className="flex gap-4"
-                >
+                <Link to="/forum/$postId" params={{ postId: post.id }} className="flex gap-4">
                   <div className="flex w-12 shrink-0 flex-col items-center rounded-xl surface-tint py-2">
                     <ArrowBigUp className="size-5 text-indigo-600" />
                     <span className="text-sm font-bold text-indigo-700">{post.upvotes}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-display text-lg font-semibold text-indigo-900">
-                      {post.title}
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-display text-lg font-semibold text-indigo-900">
+                        {post.title}
+                      </h2>
+                      {post.accepted_reply_id && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                          <BadgeCheck className="size-3" /> Solved
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {post.body.replace(/[`*#]/g, "").slice(0, 180)}
                     </p>
@@ -168,7 +200,9 @@ function ForumIndex() {
 
         {posts.length === 0 && (
           <p className="mt-10 text-center text-sm text-muted-foreground">
-            No posts yet — be the first to start a discussion.
+            {tagFilter
+              ? `No posts tagged "${tagFilter}".`
+              : "No posts yet — be the first to start a discussion."}
           </p>
         )}
       </main>

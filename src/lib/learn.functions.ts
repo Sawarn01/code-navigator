@@ -134,6 +134,7 @@ export const getMyLessonProgress = createServerFn({ method: "GET" })
       .from("lesson_progress")
       .select("lesson_id")
       .eq("user_id", context.userId)
+      .eq("completed", true)
       .limit(2000);
     return { completed: (data ?? []).map((r) => r.lesson_id) };
   });
@@ -145,8 +146,9 @@ export const setLessonComplete = createServerFn({ method: "POST" })
     completed: Boolean(input.completed),
   }))
   .handler(async ({ context, data }): Promise<{ ok: true; certificateCode: string | null }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     if (data.completed) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: quiz } = await supabaseAdmin
         .from("course_quizzes")
         .select("id")
@@ -160,43 +162,85 @@ export const setLessonComplete = createServerFn({ method: "POST" })
           .eq("quiz_id", quiz.id)
           .eq("passed", true)
           .limit(1);
-        if (!passed?.length) throw new Error("Pass the lesson quiz before marking this lesson complete.");
+        if (!passed?.length)
+          throw new Error("Pass the lesson quiz before marking this lesson complete.");
       }
-
-      const { error } = await context.supabase
-        .from("lesson_progress")
-        .insert({ user_id: context.userId, lesson_id: data.lessonId });
-      if (error && !error.message.includes("duplicate")) throw new Error(error.message);
-
-      const { data: lesson } = await supabaseAdmin
-        .from("course_lessons")
-        .select("course_sections(course_id)")
-        .eq("id", data.lessonId)
-        .maybeSingle();
-      const courseId = (lesson?.course_sections as { course_id: string } | null)?.course_id;
-      if (courseId) {
-        const { data: code } = await supabaseAdmin.rpc("issue_certificate_if_complete", {
-          _user_id: context.userId,
-          _course_id: courseId,
-        });
-        return { ok: true, certificateCode: (code as string | null) ?? null };
-      }
-    } else {
-      const { error } = await context.supabase
-        .from("lesson_progress")
-        .delete()
-        .eq("user_id", context.userId)
-        .eq("lesson_id", data.lessonId);
-      if (error) throw new Error(error.message);
     }
-    return { ok: true, certificateCode: null };
+
+    // Upsert rather than insert/delete — a watch-progress row may already
+    // exist for this lesson, and un-completing shouldn't erase watch time.
+    const { error } = await context.supabase.from("lesson_progress").upsert(
+      {
+        user_id: context.userId,
+        lesson_id: data.lessonId,
+        completed: data.completed,
+        completed_at: data.completed ? new Date().toISOString() : null,
+      },
+      { onConflict: "user_id,lesson_id" },
+    );
+    if (error) throw new Error(error.message);
+
+    if (!data.completed) return { ok: true, certificateCode: null };
+
+    const { data: lesson } = await supabaseAdmin
+      .from("course_lessons")
+      .select("course_sections(course_id)")
+      .eq("id", data.lessonId)
+      .maybeSingle();
+    const courseId = (lesson?.course_sections as { course_id: string } | null)?.course_id;
+    if (!courseId) return { ok: true, certificateCode: null };
+
+    const { data: code } = await supabaseAdmin.rpc("issue_certificate_if_complete", {
+      _user_id: context.userId,
+      _course_id: courseId,
+    });
+    return { ok: true, certificateCode: (code as string | null) ?? null };
+  });
+
+/** Throttled client-side ticks (~every 10-15s), not per-frame. */
+export const updateLessonProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: { lessonId: string; positionSeconds: number; watchedDeltaSeconds: number }) => ({
+      lessonId: String(input.lessonId),
+      positionSeconds: Math.max(0, Math.round(Number(input.positionSeconds) || 0)),
+      watchedDeltaSeconds: Math.max(
+        0,
+        Math.min(120, Math.round(Number(input.watchedDeltaSeconds) || 0)),
+      ),
+    }),
+  )
+  .handler(async ({ context, data }): Promise<{ ok: true }> => {
+    const { data: existing } = await context.supabase
+      .from("lesson_progress")
+      .select("watch_seconds")
+      .eq("user_id", context.userId)
+      .eq("lesson_id", data.lessonId)
+      .maybeSingle();
+
+    const { error } = await context.supabase.from("lesson_progress").upsert(
+      {
+        user_id: context.userId,
+        lesson_id: data.lessonId,
+        last_position_seconds: data.positionSeconds,
+        watch_seconds: (existing?.watch_seconds ?? 0) + data.watchedDeltaSeconds,
+      },
+      { onConflict: "user_id,lesson_id" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const getMyCourseProgress = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ byCourse: Record<string, number> }> => {
     const [{ data: progress }, { data: lessons }, { data: sections }] = await Promise.all([
-      context.supabase.from("lesson_progress").select("lesson_id").eq("user_id", context.userId).limit(2000),
+      context.supabase
+        .from("lesson_progress")
+        .select("lesson_id")
+        .eq("user_id", context.userId)
+        .eq("completed", true)
+        .limit(2000),
       context.supabase.from("course_lessons").select("id, section_id").limit(2000),
       context.supabase.from("course_sections").select("id, course_id").limit(500),
     ]);

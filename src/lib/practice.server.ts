@@ -68,7 +68,8 @@ export async function fetchTopicGraph(category?: "practice" | "cp") {
   ]);
 
   const visible = (links ?? []).filter((l) => {
-    const q = (l as unknown as { questions?: { category: string; is_archived: boolean } }).questions;
+    const q = (l as unknown as { questions?: { category: string; is_archived: boolean } })
+      .questions;
     if (!q || q.is_archived) return false;
     return category ? q.category === category : true;
   });
@@ -95,7 +96,6 @@ export async function fetchTopicGraph(category?: "practice" | "cp") {
   return { topics: summaries, questionTopics };
 }
 
-
 export async function fetchQuestionDetail(slug: string): Promise<QuestionDetail | null> {
   const { data } = await supabaseAdmin
     .from("questions")
@@ -115,7 +115,9 @@ export async function fetchLeaderboard(period: "all" | "month" | "week") {
   const column = period === "week" ? "week_points" : period === "month" ? "month_points" : "points";
   const { data } = await supabaseAdmin
     .from("leaderboard")
-    .select("user_id, full_name, avatar_url, points, badge_count, week_points, month_points, solved_count, rank")
+    .select(
+      "user_id, full_name, avatar_url, points, badge_count, week_points, month_points, solved_count, rank",
+    )
     .order(column, { ascending: false })
     .limit(100);
   return (data ?? []).map((row, i) => ({
@@ -124,6 +126,49 @@ export async function fetchLeaderboard(period: "all" | "month" | "week") {
     periodPoints:
       period === "week" ? row.week_points : period === "month" ? row.month_points : row.points,
   }));
+}
+
+export type TopicLeaderboardRow = {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  solved: number;
+  attempted: number;
+  pass_rate: number;
+  displayRank: number;
+};
+
+export async function fetchTopicLeaderboard(topicSlug: string): Promise<TopicLeaderboardRow[]> {
+  const { data: rows } = await supabaseAdmin
+    .from("user_topic_mastery")
+    .select("user_id, solved, attempted, pass_rate")
+    .eq("topic_slug", topicSlug)
+    .limit(5000);
+  if (!rows?.length) return [];
+
+  const userIds = [...new Set(rows.map((r) => r.user_id))];
+  const { data: profiles } = await supabaseAdmin
+    .from("profiles")
+    .select("id, full_name, avatar_url, leaderboard_opt_out")
+    .in("id", userIds);
+  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  return rows
+    .filter((r) => r.solved > 0 && !profileById.get(r.user_id)?.leaderboard_opt_out)
+    .sort((a, b) => b.solved - a.solved || b.pass_rate - a.pass_rate)
+    .slice(0, 100)
+    .map((r, i) => {
+      const p = profileById.get(r.user_id);
+      return {
+        user_id: r.user_id,
+        full_name: p?.full_name ?? null,
+        avatar_url: p?.avatar_url ?? null,
+        solved: r.solved,
+        attempted: r.attempted,
+        pass_rate: r.pass_rate,
+        displayRank: i + 1,
+      };
+    });
 }
 
 export async function fetchSolvedIds(userId: string) {

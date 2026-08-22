@@ -1,15 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, CircleAlert, Loader2, Play, ServerCrash, Send, Timer } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleAlert,
+  Lightbulb,
+  Loader2,
+  Lock,
+  MessageSquare,
+  Play,
+  ServerCrash,
+  Send,
+  Timer,
+} from "lucide-react";
 import { toast } from "sonner";
 import { CodeEditor } from "@/components/CodeEditor";
 import { DifficultyBadge } from "@/components/practice/DifficultyBadge";
 import { Markdown } from "@/lib/markdown";
 import { getQuestion } from "@/lib/practice.functions";
 import { runCode, submitSolution } from "@/lib/judge.functions";
+import { getQuestionHelp, revealHint } from "@/lib/question-help.functions";
+import { listQuestionDiscussion, createForumPost } from "@/lib/forum.functions";
 import { useAuth } from "@/hooks/useAuth";
 
 type Language = { id: string; slug: string; name: string };
@@ -27,7 +40,15 @@ type TestResult = {
 };
 
 type Outcome =
-  | { ok: true; results: TestResult[]; allPassed: boolean; graded?: boolean; pointsAwarded?: number }
+  | {
+      ok: true;
+      results: TestResult[];
+      allPassed: boolean;
+      graded?: boolean;
+      pointsAwarded?: number;
+      newRating?: number | null;
+      dailyChallengeCompleted?: boolean;
+    }
   | { ok: false; error: "service_unavailable"; message: string };
 
 function Confetti() {
@@ -76,6 +97,171 @@ function CountdownTimer({ seconds }: { seconds: number }) {
   );
 }
 
+function QuestionHelpPanel({ questionId }: { questionId: string }) {
+  const queryClient = useQueryClient();
+  const fetchHelp = useServerFn(getQuestionHelp);
+  const doReveal = useServerFn(revealHint);
+
+  const { data: help } = useQuery({
+    queryKey: ["question-help", questionId],
+    queryFn: () => fetchHelp({ data: { questionId } }),
+  });
+
+  const revealMutation = useMutation({
+    mutationFn: (hintId: string) => doReveal({ data: { hintId } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["question-help", questionId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  if (!help || (help.hints.length === 0 && !help.editorial)) return null;
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
+      {help.hints.length > 0 && (
+        <div>
+          <h3 className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-900">
+            <Lightbulb className="size-4" /> Hints
+          </h3>
+          <div className="mt-3 space-y-2">
+            {help.hints.map((hint, i) => (
+              <div key={hint.id} className="rounded-xl border border-border p-3 text-sm">
+                {hint.text ? (
+                  <p>{hint.text}</p>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={revealMutation.isPending}
+                    onClick={() => revealMutation.mutate(hint.id)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:underline disabled:opacity-60"
+                  >
+                    <Lock className="size-3.5" /> Reveal hint {i + 1}
+                    {hint.pointsPenalty > 0 ? ` (−${hint.pointsPenalty} pts)` : ""}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {help.editorial && (
+        <details className="mt-4 group">
+          <summary className="cursor-pointer text-sm font-semibold text-indigo-900">
+            Editorial
+          </summary>
+          <div className="mt-2 text-sm text-foreground">
+            <Markdown source={help.editorial} />
+          </div>
+        </details>
+      )}
+      {!help.editorial && help.hasSolved === false && help.hints.length > 0 && (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Solve this problem to unlock its editorial.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function QuestionDiscussionPanel({
+  questionId,
+  questionTitle,
+}: {
+  questionId: string;
+  questionTitle: string;
+}) {
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+  const fetchDiscussion = useServerFn(listQuestionDiscussion);
+  const post = useServerFn(createForumPost);
+  const [body, setBody] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const { data: posts } = useQuery({
+    queryKey: ["question-discussion", questionId],
+    queryFn: () => fetchDiscussion({ data: { questionId } }),
+  });
+
+  const postMutation = useMutation({
+    mutationFn: () =>
+      post({
+        data: {
+          title: `Question about ${questionTitle}`,
+          body,
+          tags: [],
+          questionId,
+        },
+      }),
+    onSuccess: () => {
+      setBody("");
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["question-discussion", questionId] });
+      toast.success("Posted to the forum");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-900">
+          <MessageSquare className="size-4" /> Discussion
+        </h3>
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="text-xs font-semibold text-indigo-700 hover:underline"
+          >
+            {open ? "Cancel" : "Ask a question"}
+          </button>
+        )}
+      </div>
+
+      {open && (
+        <div className="mt-3">
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={3}
+            placeholder="What are you stuck on?"
+            className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-ring/30"
+          />
+          <button
+            type="button"
+            disabled={body.trim().length < 10 || postMutation.isPending}
+            onClick={() => postMutation.mutate()}
+            className="mt-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+          >
+            Post
+          </button>
+        </div>
+      )}
+
+      <ul className="mt-3 space-y-2">
+        {(posts ?? []).length === 0 && !open && (
+          <p className="text-xs text-muted-foreground">No discussion yet for this problem.</p>
+        )}
+        {(posts ?? []).map((p) => (
+          <li key={p.id}>
+            <Link
+              to="/forum/$postId"
+              params={{ postId: p.id }}
+              className="block rounded-xl border border-border p-3 text-sm hover:border-indigo-200 hover:bg-accent/40"
+            >
+              <p className="font-medium text-indigo-900">{p.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {p.author?.full_name ?? "Member"} · {p.reply_count} repl
+                {p.reply_count === 1 ? "y" : "ies"}
+              </p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function ProblemWorkspace({
   slug,
   languages,
@@ -88,6 +274,7 @@ export function ProblemWorkspace({
   contestSeconds?: number | undefined;
 }) {
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const fetchQuestion = useServerFn(getQuestion);
   const doRun = useServerFn(runCode);
   const doSubmit = useServerFn(submitSolution);
@@ -133,6 +320,14 @@ export function ProblemWorkspace({
           r.pointsAwarded ? `Accepted — +${r.pointsAwarded} points!` : "Accepted! Already solved.",
         );
         (r.newBadges ?? []).forEach((b) => toast(`🏅 Badge unlocked: ${b}`));
+        if (mode === "cp" && typeof r.newRating === "number") {
+          toast(`⚔️ CP rating: ${r.newRating}`);
+          queryClient.invalidateQueries({ queryKey: ["my-cp-rating"] });
+        }
+        if (r.dailyChallengeCompleted) {
+          toast("🔥 Daily challenge complete!");
+          queryClient.invalidateQueries({ queryKey: ["my-daily-status"] });
+        }
       } else if (r.ok) {
         toast.error("Some test cases failed.");
       }
@@ -141,10 +336,18 @@ export function ProblemWorkspace({
   });
 
   if (isLoading) {
-    return <div className="grid h-64 place-items-center text-sm text-muted-foreground">Loading problem…</div>;
+    return (
+      <div className="grid h-64 place-items-center text-sm text-muted-foreground">
+        Loading problem…
+      </div>
+    );
   }
   if (!question) {
-    return <div className="grid h-64 place-items-center text-sm text-muted-foreground">Select a problem to begin.</div>;
+    return (
+      <div className="grid h-64 place-items-center text-sm text-muted-foreground">
+        Select a problem to begin.
+      </div>
+    );
   }
 
   const isSql = questionLanguage === "sql";
@@ -327,6 +530,13 @@ export function ProblemWorkspace({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {mode === "practice" && isAuthenticated && (
+        <>
+          <QuestionHelpPanel questionId={question.id} />
+          <QuestionDiscussionPanel questionId={question.id} questionTitle={question.title} />
+        </>
+      )}
     </div>
   );
 }

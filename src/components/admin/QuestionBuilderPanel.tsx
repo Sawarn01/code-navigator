@@ -12,6 +12,7 @@ import {
   previewRunQuestion,
   saveQuestion,
   setQuestionArchived,
+  type AdminHint,
   type AdminTestCase,
 } from "@/lib/question-admin.functions";
 
@@ -33,6 +34,9 @@ type Draft = {
   testCases: AdminTestCase[];
   topicIds: string[];
   submissions: number;
+  editorial: string;
+  editorial_video_id: string;
+  hints: AdminHint[];
 };
 
 const EMPTY: Draft = {
@@ -53,6 +57,9 @@ const EMPTY: Draft = {
   testCases: [{ input: "", expected_output: "", is_sample: true }],
   topicIds: [],
   submissions: 0,
+  editorial: "",
+  editorial_video_id: "",
+  hints: [],
 };
 
 const input =
@@ -100,7 +107,11 @@ export function QuestionBuilderPanel() {
   };
 
   const openNew = () =>
-    setDraft({ ...EMPTY, language_id: data?.languages[0]?.id ?? "", testCases: [{ ...EMPTY.testCases[0]! }] });
+    setDraft({
+      ...EMPTY,
+      language_id: data?.languages[0]?.id ?? "",
+      testCases: [{ ...EMPTY.testCases[0]! }],
+    });
 
   const openEdit = async (id: string) => {
     const q = await loadFn({ data: { questionId: id } });
@@ -124,9 +135,14 @@ export function QuestionBuilderPanel() {
       memory_limit_mb: q.memory_limit_mb,
       sql_setup: q.sql_setup ?? "",
       is_archived: q.is_archived,
-      testCases: q.testCases.length ? q.testCases : [{ input: "", expected_output: "", is_sample: true }],
+      testCases: q.testCases.length
+        ? q.testCases
+        : [{ input: "", expected_output: "", is_sample: true }],
       topicIds: q.topicIds,
       submissions: q.submissions,
+      editorial: q.editorial ?? "",
+      editorial_video_id: q.editorial_video_id ?? "",
+      hints: q.hints,
     });
   };
 
@@ -150,6 +166,9 @@ export function QuestionBuilderPanel() {
           is_archived: d.is_archived,
           testCases: d.testCases,
           topicIds: d.topicIds,
+          editorial: d.editorial || null,
+          editorial_video_id: d.editorial_video_id || null,
+          hints: d.hints,
         },
       }),
     onSuccess: () => {
@@ -243,12 +262,20 @@ export function QuestionBuilderPanel() {
           placeholder="Search questions"
           className={`${input} max-w-xs`}
         />
-        <select value={category} onChange={(e) => setCategory(e.target.value as never)} className={`${input} w-auto`}>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as never)}
+          className={`${input} w-auto`}
+        >
           <option value="all">All categories</option>
           <option value="practice">Practice</option>
           <option value="cp">CP</option>
         </select>
-        <select value={language} onChange={(e) => setLanguage(e.target.value)} className={`${input} w-auto`}>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className={`${input} w-auto`}
+        >
           <option value="all">All languages</option>
           {data?.languages.map((l) => (
             <option key={l.id} value={l.id}>
@@ -256,7 +283,11 @@ export function QuestionBuilderPanel() {
             </option>
           ))}
         </select>
-        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className={`${input} w-auto`}>
+        <select
+          value={difficulty}
+          onChange={(e) => setDifficulty(e.target.value)}
+          className={`${input} w-auto`}
+        >
           <option value="all">Any difficulty</option>
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
@@ -500,7 +531,9 @@ export function QuestionBuilderPanel() {
                       <input
                         type="number"
                         value={draft.time_limit_ms}
-                        onChange={(e) => setDraft({ ...draft, time_limit_ms: Number(e.target.value) })}
+                        onChange={(e) =>
+                          setDraft({ ...draft, time_limit_ms: Number(e.target.value) })
+                        }
                         className={`${input} mt-1`}
                       />
                     </div>
@@ -542,7 +575,10 @@ export function QuestionBuilderPanel() {
                     <CodeEditor
                       value={draft.starter_code}
                       onChange={(v) => setDraft({ ...draft, starter_code: v })}
-                      language={data?.languages.find((l) => l.id === draft.language_id)?.slug ?? "javascript"}
+                      language={
+                        data?.languages.find((l) => l.id === draft.language_id)?.slug ??
+                        "javascript"
+                      }
                       height="220px"
                     />
                   </div>
@@ -574,6 +610,89 @@ export function QuestionBuilderPanel() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <span className={label}>Editorial (markdown, shown after a student solves)</span>
+                  <textarea
+                    value={draft.editorial}
+                    onChange={(e) => setDraft({ ...draft, editorial: e.target.value })}
+                    rows={5}
+                    className={`${input} mt-1 font-mono text-xs`}
+                  />
+                </div>
+                <div>
+                  <span className={label}>Editorial video ID (optional)</span>
+                  <input
+                    value={draft.editorial_video_id}
+                    onChange={(e) => setDraft({ ...draft, editorial_video_id: e.target.value })}
+                    placeholder="YouTube video ID"
+                    className={`${input} mt-1`}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <span className={label}>Hints (revealed one at a time, each costs points)</span>
+                    <button
+                      onClick={() =>
+                        setDraft({
+                          ...draft,
+                          hints: [...draft.hints, { hint_text: "", points_penalty: 0 }],
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold"
+                    >
+                      <Plus className="size-3.5" /> Add hint
+                    </button>
+                  </div>
+                  <div className="mt-2 space-y-2">
+                    {draft.hints.map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 rounded-xl border border-border p-3"
+                      >
+                        <span className="mt-2 text-xs font-semibold text-muted-foreground">
+                          {i + 1}.
+                        </span>
+                        <textarea
+                          value={h.hint_text}
+                          onChange={(e) => {
+                            const next = [...draft.hints];
+                            next[i] = { ...h, hint_text: e.target.value };
+                            setDraft({ ...draft, hints: next });
+                          }}
+                          rows={2}
+                          placeholder="Hint text"
+                          className={`${input} flex-1 text-xs`}
+                        />
+                        <label className="flex shrink-0 flex-col items-center gap-1 text-[10px] font-semibold text-muted-foreground">
+                          Penalty
+                          <input
+                            type="number"
+                            value={h.points_penalty}
+                            onChange={(e) => {
+                              const next = [...draft.hints];
+                              next[i] = { ...h, points_penalty: Number(e.target.value) };
+                              setDraft({ ...draft, hints: next });
+                            }}
+                            className="w-16 rounded-lg border border-input bg-background px-2 py-1 text-center text-xs"
+                          />
+                        </label>
+                        <button
+                          onClick={() =>
+                            setDraft({ ...draft, hints: draft.hints.filter((_, x) => x !== i) })
+                          }
+                          className="mt-2 text-rose-600"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    {draft.hints.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No hints yet.</p>
+                    )}
                   </div>
                 </div>
 

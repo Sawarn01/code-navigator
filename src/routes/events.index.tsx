@@ -104,7 +104,9 @@ function EventsPage() {
           )}
         </motion.div>
 
-        <AnimatePresence>{showForm && isStaff && <CreateEventForm onDone={() => setShowForm(false)} />}</AnimatePresence>
+        <AnimatePresence>
+          {showForm && isStaff && <CreateEventForm onDone={() => setShowForm(false)} />}
+        </AnimatePresence>
 
         <BentoCard className="mt-8">
           <h2 className="font-display text-lg font-bold text-indigo-900">The Saturday cadence</h2>
@@ -157,7 +159,9 @@ function EventsPage() {
         <section className="mt-8 space-y-10">
           {months.map(([month, list]) => (
             <div key={month}>
-              <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-indigo-700">{month}</h3>
+              <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-indigo-700">
+                {month}
+              </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {list.map((event, i) => (
                   <EventCard
@@ -204,7 +208,14 @@ function EventCard({
   delay,
   muted,
 }: {
-  event: { id: string; title: string; description: string | null; type: string; start_time: string; location: string | null };
+  event: {
+    id: string;
+    title: string;
+    description: string | null;
+    type: string;
+    start_time: string;
+    location: string | null;
+  };
   attendees: number;
   delay: number;
   muted?: boolean;
@@ -223,7 +234,9 @@ function EventCard({
     >
       <Link to="/events/$eventId" params={{ eventId: event.id }} className="block">
         <div className="flex items-center justify-between gap-3">
-          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.chip}`}>
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.chip}`}
+          >
             <meta.icon className="size-3.5" /> {meta.label}
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -259,6 +272,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
       end_time: string | null;
       location: string | null;
       registration_link: string | null;
+      capacity: number | null;
     }) => submit({ data: vars }),
     onSuccess: () => {
       toast.success("Event created");
@@ -284,13 +298,24 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
           end_time: String(fd.get("end_time") ?? "") || null,
           location: String(fd.get("location") ?? "") || null,
           registration_link: String(fd.get("registration_link") ?? "") || null,
+          capacity: fd.get("capacity") ? Number(fd.get("capacity")) : null,
         });
       }}
       className="mt-6 overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]"
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <input name="title" required placeholder="Event title" className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2" />
-        <textarea name="description" placeholder="Description" rows={3} className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2" />
+        <input
+          name="title"
+          required
+          placeholder="Event title"
+          className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2"
+        />
+        <textarea
+          name="description"
+          placeholder="Description"
+          rows={3}
+          className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2"
+        />
         <select name="type" className="rounded-xl border border-input px-3 py-2 text-sm">
           {EVENT_TYPES.map((t) => (
             <option key={t} value={t}>
@@ -298,16 +323,43 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
             </option>
           ))}
         </select>
-        <input name="location" placeholder="Location or virtual link label" className="rounded-xl border border-input px-3 py-2 text-sm" />
+        <input
+          name="location"
+          placeholder="Location or virtual link label"
+          className="rounded-xl border border-input px-3 py-2 text-sm"
+        />
         <label className="text-xs font-semibold text-indigo-700">
           Starts
-          <input name="start_time" type="datetime-local" required className="mt-1 w-full rounded-xl border border-input px-3 py-2 text-sm" />
+          <input
+            name="start_time"
+            type="datetime-local"
+            required
+            className="mt-1 w-full rounded-xl border border-input px-3 py-2 text-sm"
+          />
         </label>
         <label className="text-xs font-semibold text-indigo-700">
           Ends
-          <input name="end_time" type="datetime-local" className="mt-1 w-full rounded-xl border border-input px-3 py-2 text-sm" />
+          <input
+            name="end_time"
+            type="datetime-local"
+            className="mt-1 w-full rounded-xl border border-input px-3 py-2 text-sm"
+          />
         </label>
-        <input name="registration_link" placeholder="External registration link (optional)" className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2" />
+        <input
+          name="registration_link"
+          placeholder="External registration link (optional)"
+          className="rounded-xl border border-input px-3 py-2 text-sm sm:col-span-2"
+        />
+        <label className="text-xs font-semibold text-indigo-700">
+          Capacity (optional)
+          <input
+            name="capacity"
+            type="number"
+            min={1}
+            placeholder="Unlimited"
+            className="mt-1 w-full rounded-xl border border-input px-3 py-2 text-sm"
+          />
+        </label>
       </div>
       <div className="mt-4 flex gap-2">
         <button
@@ -317,7 +369,11 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
         >
           {mutation.isPending ? "Creating…" : "Create event"}
         </button>
-        <button type="button" onClick={onDone} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground">
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground"
+        >
           Cancel
         </button>
       </div>

@@ -23,13 +23,13 @@ import {
   listBuilderCourses,
   reorderItems,
   saveCourse,
+  saveCoursePrerequisites,
   saveLesson,
   saveResource,
   saveSection,
   type BuilderLesson,
   type BuilderSection,
 } from "@/lib/course-builder.functions";
-
 
 const RESOURCE_TYPES = ["pdf", "slides", "link", "code"] as const;
 
@@ -38,6 +38,7 @@ export function CourseBuilderPanel() {
   const fetchCourses = useServerFn(listBuilderCourses);
   const fetchCourse = useServerFn(getBuilderCourse);
   const persistCourse = useServerFn(saveCourse);
+  const persistPrereqs = useServerFn(saveCoursePrerequisites);
   const persistSection = useServerFn(saveSection);
   const persistLesson = useServerFn(saveLesson);
   const persistResource = useServerFn(saveResource);
@@ -78,7 +79,6 @@ export function CourseBuilderPanel() {
     queryClient.invalidateQueries({ queryKey: ["courses"] });
     queryClient.invalidateQueries({ queryKey: ["course", selectedId] });
   };
-
 
   const run = useMutation({
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
@@ -136,7 +136,11 @@ export function CourseBuilderPanel() {
             const id = e.target.value || null;
             setSelectedId(id);
             const found = catalog?.courses.find((c) => c.id === id);
-            setMeta({ title: found?.title ?? "", description: "", language_id: found?.language_id ?? "" });
+            setMeta({
+              title: found?.title ?? "",
+              description: "",
+              language_id: found?.language_id ?? "",
+            });
           }}
           className="rounded-xl border border-input bg-background px-3 py-2 text-sm"
         >
@@ -189,7 +193,11 @@ export function CourseBuilderPanel() {
                       <button
                         onClick={() => {
                           setSelectedId(c.id);
-                          setMeta({ title: c.title, description: "", language_id: c.language_id ?? "" });
+                          setMeta({
+                            title: c.title,
+                            description: "",
+                            language_id: c.language_id ?? "",
+                          });
                         }}
                         className="rounded-lg border border-border px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
                       >
@@ -238,9 +246,9 @@ export function CourseBuilderPanel() {
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     This permanently removes the course along with{" "}
-                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.lessons ?? 0} lesson(s),
-                    all of its sections, quizzes, lesson resources and discussions, plus the saved
-                    progress of{" "}
+                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.lessons ?? 0}{" "}
+                    lesson(s), all of its sections, quizzes, lesson resources and discussions, plus
+                    the saved progress of{" "}
                     {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.learners ?? 0}{" "}
                     enrolled learner(s) and any certificates issued for it. This cannot be undone.
                   </p>
@@ -272,8 +280,6 @@ export function CourseBuilderPanel() {
           </motion.div>
         )}
       </AnimatePresence>
-
-
 
       {course && (
         <div className="mt-6 space-y-5">
@@ -332,9 +338,56 @@ export function CourseBuilderPanel() {
             >
               <Save className="size-4" /> Save details
             </motion.button>
+
+            <div className="mt-4 border-t border-border pt-4">
+              <span className="text-xs font-semibold text-indigo-900">
+                Prerequisites — students must finish these courses first
+              </span>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(catalog?.courses ?? [])
+                  .filter((c) => c.id !== course.id)
+                  .map((c) => {
+                    const on = course.prerequisiteIds.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => {
+                          const next = on
+                            ? course.prerequisiteIds.filter((id) => id !== c.id)
+                            : [...course.prerequisiteIds, c.id];
+                          queryClient.setQueryData(
+                            ["builder-course", selectedId],
+                            (old: typeof course) => (old ? { ...old, prerequisiteIds: next } : old),
+                          );
+                          run.mutate(async () => {
+                            await persistPrereqs({
+                              data: { courseId: course.id, prerequisiteIds: next },
+                            });
+                          });
+                        }}
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          on
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                        }`}
+                      >
+                        {c.title}
+                      </button>
+                    );
+                  })}
+                {(catalog?.courses ?? []).length <= 1 && (
+                  <p className="text-xs text-muted-foreground">No other courses to require yet.</p>
+                )}
+              </div>
+            </div>
           </div>
 
-          <Reorder.Group axis="y" values={sections} onReorder={reorderSections} className="space-y-3">
+          <Reorder.Group
+            axis="y"
+            values={sections}
+            onReorder={reorderSections}
+            className="space-y-3"
+          >
             {sections.map((section) => (
               <Reorder.Item
                 key={section.id}
@@ -377,11 +430,17 @@ export function CourseBuilderPanel() {
                   className="mt-3 space-y-2 pl-6"
                 >
                   {section.lessons.map((lesson) => (
-                    <Reorder.Item key={lesson.id} value={lesson} className="rounded-xl bg-muted/50 p-2">
+                    <Reorder.Item
+                      key={lesson.id}
+                      value={lesson}
+                      className="rounded-xl bg-muted/50 p-2"
+                    >
                       <div className="flex items-center gap-2">
                         <GripVertical className="size-3.5 cursor-grab text-indigo-300" />
                         <button
-                          onClick={() => setOpenLessonId(openLessonId === lesson.id ? null : lesson.id)}
+                          onClick={() =>
+                            setOpenLessonId(openLessonId === lesson.id ? null : lesson.id)
+                          }
                           className="flex flex-1 items-center justify-between gap-2 text-left text-sm text-indigo-900"
                         >
                           <span>{lesson.title}</span>
@@ -465,6 +524,43 @@ export function CourseBuilderPanel() {
                                         ...lessonPayload(lesson, section.id),
                                         practice_topic: v,
                                         has_practice: Boolean(v),
+                                      },
+                                    });
+                                  })
+                                }
+                              />
+                              <LessonField
+                                label="Drip: unlock N days after enrollment"
+                                defaultValue={
+                                  lesson.drip_after_days != null
+                                    ? String(lesson.drip_after_days)
+                                    : ""
+                                }
+                                onCommit={(v) =>
+                                  run.mutate(async () => {
+                                    await persistLesson({
+                                      data: {
+                                        ...lessonPayload(lesson, section.id),
+                                        drip_after_days: v === "" ? null : Number(v),
+                                      },
+                                    });
+                                  })
+                                }
+                              />
+                              <LessonField
+                                label="Drip: unlock on exact date (overrides above)"
+                                type="datetime-local"
+                                defaultValue={
+                                  lesson.release_at
+                                    ? new Date(lesson.release_at).toISOString().slice(0, 16)
+                                    : ""
+                                }
+                                onCommit={(v) =>
+                                  run.mutate(async () => {
+                                    await persistLesson({
+                                      data: {
+                                        ...lessonPayload(lesson, section.id),
+                                        release_at: v || null,
                                       },
                                     });
                                   })
@@ -578,6 +674,8 @@ function lessonPayload(lesson: BuilderLesson, sectionId: string) {
     has_practice: lesson.has_practice,
     practice_topic: lesson.practice_topic,
     duration_minutes: lesson.duration_minutes,
+    drip_after_days: lesson.drip_after_days,
+    release_at: lesson.release_at,
   };
 }
 
@@ -585,15 +683,18 @@ function LessonField({
   label,
   defaultValue,
   onCommit,
+  type = "text",
 }: {
   label: string;
   defaultValue: string;
   onCommit: (value: string) => void;
+  type?: string;
 }) {
   return (
     <label className="text-[11px] font-semibold text-indigo-900">
       {label}
       <input
+        type={type}
         defaultValue={defaultValue}
         onBlur={(e) => e.target.value !== defaultValue && onCommit(e.target.value)}
         className="mt-1 w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs font-normal"

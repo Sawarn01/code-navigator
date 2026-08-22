@@ -3,7 +3,7 @@ import { queryOptions, useSuspenseQuery, useQueryClient, useQuery } from "@tanst
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowBigUp, ArrowLeft, Trash2, Pencil, Send } from "lucide-react";
+import { ArrowBigUp, ArrowLeft, BadgeCheck, Trash2, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Markdown } from "@/lib/markdown";
@@ -16,6 +16,7 @@ import {
   deleteForumPost,
   deleteForumReply,
   updateForumPost,
+  acceptReply,
 } from "@/lib/forum.functions";
 
 const postQuery = (postId: string) =>
@@ -66,7 +67,8 @@ function formatDate(iso: string) {
 function ForumPostPage() {
   const { postId } = Route.useParams();
   const { data } = useSuspenseQuery(postQuery(postId));
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, role } = useAuth();
+  const isStaff = role === "admin" || role === "manager";
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -75,6 +77,7 @@ function ForumPostPage() {
   const removePost = useServerFn(deleteForumPost);
   const removeReply = useServerFn(deleteForumReply);
   const editPost = useServerFn(updateForumPost);
+  const accept = useServerFn(acceptReply);
 
   const { data: myVotes } = useQuery({
     queryKey: ["forum", "votes", user?.id ?? "anon"],
@@ -100,10 +103,21 @@ function ForumPostPage() {
   }
 
   const isAuthor = user?.id === post.user_id;
+  const canAccept = isAuthor || isStaff;
   const votedPost = myVotes?.posts.includes(post.id) ?? false;
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: ["forum"] });
+  }
+
+  async function handleAccept(replyId: string | null) {
+    try {
+      await accept({ data: { postId: post!.id, replyId } });
+      await refresh();
+      toast.success(replyId ? "Marked as the accepted answer" : "Removed accepted answer");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not update the accepted answer");
+    }
   }
 
   async function handleVote(target: { postId?: string; replyId?: string }) {
@@ -215,9 +229,16 @@ function ForumPostPage() {
                 </div>
               ) : (
                 <>
-                  <h1 className="font-display text-2xl font-bold tracking-tight text-indigo-900">
-                    {post.title}
-                  </h1>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="font-display text-2xl font-bold tracking-tight text-indigo-900">
+                      {post.title}
+                    </h1>
+                    {post.accepted_reply_id && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
+                        <BadgeCheck className="size-3.5" /> Solved
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {post.author?.full_name ?? "A student"} · {formatDate(post.created_at)}
                   </p>
@@ -281,7 +302,9 @@ function ForumPostPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -12 }}
                 transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.2) }}
-                className="bento-card flex gap-4"
+                className={`bento-card flex gap-4 ${
+                  post.accepted_reply_id === r.id ? "border-2 border-emerald-300" : ""
+                }`}
               >
                 <motion.button
                   type="button"
@@ -298,10 +321,31 @@ function ForumPostPage() {
                   <span className="text-xs font-bold">{r.upvotes}</span>
                 </motion.button>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">
-                    {r.author?.full_name ?? "A student"} · {formatDate(r.created_at)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {r.author?.full_name ?? "A student"} · {formatDate(r.created_at)}
+                    </p>
+                    {post.accepted_reply_id === r.id && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                        <BadgeCheck className="size-3" /> Accepted answer
+                      </span>
+                    )}
+                  </div>
                   <Markdown source={r.body} className="mt-1 text-sm text-foreground/90" />
+                  {canAccept && (
+                    <button
+                      type="button"
+                      onClick={() => handleAccept(post.accepted_reply_id === r.id ? null : r.id)}
+                      className={`mt-2 mr-3 inline-flex items-center gap-1 text-[11px] font-semibold ${
+                        post.accepted_reply_id === r.id
+                          ? "text-muted-foreground hover:text-foreground"
+                          : "text-emerald-700 hover:underline"
+                      }`}
+                    >
+                      <BadgeCheck className="size-3" />
+                      {post.accepted_reply_id === r.id ? "Unaccept" : "Accept as answer"}
+                    </button>
+                  )}
                   {user?.id === r.user_id && (
                     <button
                       type="button"

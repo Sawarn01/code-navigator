@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BadgesRouteImport } from './routes/badges'
 import { Route as CpZoneRouteImport } from './routes/cp-zone'
 import { Route as DictionaryRouteImport } from './routes/dictionary'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -20,6 +21,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
+import { Route as AuthenticatedMentorshipRouteImport } from './routes/_authenticated/mentorship'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as CertificateCertificateCodeRouteImport } from './routes/certificate.$certificateCode'
@@ -40,6 +42,7 @@ import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
 import { Route as PracticeTopicsIndexRouteImport } from './routes/practice.topics.index'
 import { Route as PracticeTopicsTopicSlugRouteImport } from './routes/practice.topics.$topicSlug'
+import { Route as ApiPublicHooksEventRemindersRouteImport } from './routes/api/public/hooks/event-reminders'
 import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const IndexRoute = IndexRouteImport.update({
@@ -54,6 +57,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BadgesRoute = BadgesRouteImport.update({
+  id: '/badges',
+  path: '/badges',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CpZoneRoute = CpZoneRouteImport.update({
@@ -94,6 +102,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
   id: '/mentees',
   path: '/mentees',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMentorshipRoute = AuthenticatedMentorshipRouteImport.update({
+  id: '/mentorship',
+  path: '/mentorship',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReportingRoute = AuthenticatedReportingRouteImport.update({
@@ -202,6 +215,12 @@ const PracticeTopicsTopicSlugRoute = PracticeTopicsTopicSlugRouteImport.update({
   path: '/practice/topics/$topicSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksEventRemindersRoute =
+  ApiPublicHooksEventRemindersRouteImport.update({
+    id: '/api/public/hooks/event-reminders',
+    path: '/api/public/hooks/event-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksWeeklyDigestRoute =
   ApiPublicHooksWeeklyDigestRouteImport.update({
     id: '/api/public/hooks/weekly-digest',
@@ -212,6 +231,7 @@ const ApiPublicHooksWeeklyDigestRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/badges': typeof BadgesRoute
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -220,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/mentorship': typeof AuthenticatedMentorshipRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -240,11 +261,13 @@ export interface FileRoutesByFullPath {
   '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics/': typeof PracticeTopicsIndexRoute
+  '/api/public/hooks/event-reminders': typeof ApiPublicHooksEventRemindersRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/badges': typeof BadgesRoute
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -253,6 +276,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/mentorship': typeof AuthenticatedMentorshipRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -273,6 +297,7 @@ export interface FileRoutesByTo {
   '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics': typeof PracticeTopicsIndexRoute
+  '/api/public/hooks/event-reminders': typeof ApiPublicHooksEventRemindersRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesById {
@@ -280,6 +305,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/badges': typeof BadgesRoute
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -288,6 +314,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
+  '/_authenticated/mentorship': typeof AuthenticatedMentorshipRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -308,6 +335,7 @@ export interface FileRoutesById {
   '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
   '/practice/topics/': typeof PracticeTopicsIndexRoute
+  '/api/public/hooks/event-reminders': typeof ApiPublicHooksEventRemindersRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRouteTypes {
@@ -315,6 +343,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/badges'
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
@@ -323,6 +352,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/mentees'
+    | '/mentorship'
     | '/reporting'
     | '/settings'
     | '/certificate/$certificateCode'
@@ -343,11 +373,13 @@ export interface FileRouteTypes {
     | '/practice/topics/$topicSlug'
     | '/groups/'
     | '/practice/topics/'
+    | '/api/public/hooks/event-reminders'
     | '/api/public/hooks/weekly-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/badges'
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
@@ -356,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/mentees'
+    | '/mentorship'
     | '/reporting'
     | '/settings'
     | '/certificate/$certificateCode'
@@ -376,12 +409,14 @@ export interface FileRouteTypes {
     | '/practice/topics/$topicSlug'
     | '/groups'
     | '/practice/topics'
+    | '/api/public/hooks/event-reminders'
     | '/api/public/hooks/weekly-digest'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/badges'
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
@@ -390,6 +425,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/mentees'
+    | '/_authenticated/mentorship'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
     | '/certificate/$certificateCode'
@@ -410,6 +446,7 @@ export interface FileRouteTypes {
     | '/practice/topics/$topicSlug'
     | '/_authenticated/groups/'
     | '/practice/topics/'
+    | '/api/public/hooks/event-reminders'
     | '/api/public/hooks/weekly-digest'
   fileRoutesById: FileRoutesById
 }
@@ -417,6 +454,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BadgesRoute: typeof BadgesRoute
   CpZoneRoute: typeof CpZoneRoute
   DictionaryRoute: typeof DictionaryRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -434,6 +472,7 @@ export interface RootRouteChildren {
   PracticeIndexRoute: typeof PracticeIndexRoute
   PracticeTopicsTopicSlugRoute: typeof PracticeTopicsTopicSlugRoute
   PracticeTopicsIndexRoute: typeof PracticeTopicsIndexRoute
+  ApiPublicHooksEventRemindersRoute: typeof ApiPublicHooksEventRemindersRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
@@ -458,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/badges': {
+      id: '/badges'
+      path: '/badges'
+      fullPath: '/badges'
+      preLoaderRoute: typeof BadgesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cp-zone': {
@@ -514,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/mentees'
       fullPath: '/mentees'
       preLoaderRoute: typeof AuthenticatedMenteesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mentorship': {
+      id: '/_authenticated/mentorship'
+      path: '/mentorship'
+      fullPath: '/mentorship'
+      preLoaderRoute: typeof AuthenticatedMentorshipRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reporting': {
@@ -656,6 +709,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeTopicsTopicSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/event-reminders': {
+      id: '/api/public/hooks/event-reminders'
+      path: '/api/public/hooks/event-reminders'
+      fullPath: '/api/public/hooks/event-reminders'
+      preLoaderRoute: typeof ApiPublicHooksEventRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weekly-digest': {
       id: '/api/public/hooks/weekly-digest'
       path: '/api/public/hooks/weekly-digest'
@@ -670,6 +730,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
+  AuthenticatedMentorshipRoute: typeof AuthenticatedMentorshipRoute
   AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
@@ -684,6 +745,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
+  AuthenticatedMentorshipRoute: AuthenticatedMentorshipRoute,
   AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
@@ -701,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BadgesRoute: BadgesRoute,
   CpZoneRoute: CpZoneRoute,
   DictionaryRoute: DictionaryRoute,
   LeaderboardRoute: LeaderboardRoute,
@@ -718,6 +781,7 @@ const rootRouteChildren: RootRouteChildren = {
   PracticeIndexRoute: PracticeIndexRoute,
   PracticeTopicsTopicSlugRoute: PracticeTopicsTopicSlugRoute,
   PracticeTopicsIndexRoute: PracticeTopicsIndexRoute,
+  ApiPublicHooksEventRemindersRoute: ApiPublicHooksEventRemindersRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport

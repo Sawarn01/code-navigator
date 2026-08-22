@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { escapeHtml, sendEmail } from "@/lib/email.server";
 
 export type DigestResult = { processed: number; sent: number; skipped: number; errors: string[] };
 
@@ -21,12 +22,6 @@ function adminClient() {
   });
 }
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"]/g, (c) =>
-    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;",
-  );
-}
-
 function renderEmail(input: {
   name: string;
   points: number;
@@ -45,7 +40,7 @@ function renderEmail(input: {
               .replace("T", " ")} UTC</li>`,
         )
         .join("")
-    : "<li style=\"margin:4px 0\">Nothing scheduled yet — check back soon.</li>";
+    : '<li style="margin:4px 0">Nothing scheduled yet — check back soon.</li>';
 
   return `<div style="font-family:Inter,Segoe UI,sans-serif;background:#ffffff;color:#1e1b4b;padding:24px">
     <h1 style="font-size:22px;margin:0 0 4px">Your week on Space</h1>
@@ -64,18 +59,6 @@ function renderEmail(input: {
     <ul style="padding-left:18px;margin:0;color:#3730a3">${events}</ul>
     <p style="margin-top:24px;font-size:12px;color:#6b7280">Don't want this? Turn off the weekly digest in your Space settings.</p>
   </div>`;
-}
-
-async function sendEmail(to: string, subject: string, html: string) {
-  const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
-  const from = process.env["DIGEST_FROM_EMAIL"] ?? "Space <onboarding@resend.dev>";
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to, subject, html }),
-  });
-  if (!res.ok) throw new Error(`Email provider error ${res.status}: ${await res.text()}`);
 }
 
 export async function runWeeklyDigest(): Promise<DigestResult> {

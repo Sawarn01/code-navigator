@@ -13,6 +13,7 @@ export type ForumPostSummary = {
   created_at: string;
   author: ForumAuthor | null;
   reply_count: number;
+  accepted_reply_id: string | null;
 };
 
 export type ForumReply = {
@@ -47,7 +48,7 @@ export const listForumPosts = createServerFn({ method: "GET" }).handler(
     const supabase = serverPublicClient();
     const { data: posts } = await supabase
       .from("forum_posts")
-      .select("id, user_id, title, body, tags, upvotes, created_at")
+      .select("id, user_id, title, body, tags, upvotes, created_at, accepted_reply_id")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -86,13 +87,60 @@ export const listForumPosts = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/** Discussion thread scoped to one practice/CP question. */
+export const listQuestionDiscussion = createServerFn({ method: "POST" })
+  .inputValidator((input: { questionId: string }) => ({ questionId: String(input.questionId) }))
+  .handler(async ({ data }): Promise<ForumPostSummary[]> => {
+    const supabase = serverPublicClient();
+    const { data: posts } = await supabase
+      .from("forum_posts")
+      .select("id, user_id, title, body, tags, upvotes, created_at, accepted_reply_id")
+      .eq("question_id", data.questionId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    const rows = posts ?? [];
+    if (rows.length === 0) return [];
+
+    const [authors, { data: replies }] = await Promise.all([
+      authorsFor(
+        supabase,
+        rows.map((r) => r.user_id),
+      ),
+      supabase
+        .from("forum_replies")
+        .select("post_id")
+        .in(
+          "post_id",
+          rows.map((r) => r.id),
+        ),
+    ]);
+
+    const counts = new Map<string, number>();
+    for (const r of replies ?? []) {
+      counts.set(r.post_id, (counts.get(r.post_id) ?? 0) + 1);
+    }
+
+    return rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      body: r.body,
+      tags: r.tags ?? [],
+      upvotes: r.upvotes ?? 0,
+      created_at: r.created_at,
+      author: authors.get(r.user_id) ?? null,
+      reply_count: counts.get(r.id) ?? 0,
+      accepted_reply_id: r.accepted_reply_id,
+    }));
+  });
+
 export const getForumPost = createServerFn({ method: "GET" })
   .inputValidator((input: { postId: string }) => ({ postId: String(input.postId) }))
   .handler(async ({ data }): Promise<ForumPostDetail> => {
     const supabase = serverPublicClient();
     const { data: post } = await supabase
       .from("forum_posts")
-      .select("id, user_id, title, body, tags, upvotes, created_at")
+      .select("id, user_id, title, body, tags, upvotes, created_at, accepted_reply_id")
       .eq("id", data.postId)
       .maybeSingle();
 
@@ -118,6 +166,7 @@ export const getForumPost = createServerFn({ method: "GET" })
         created_at: post.created_at,
         author: authors.get(post.user_id) ?? null,
         reply_count: rows.length,
+        accepted_reply_id: post.accepted_reply_id,
       },
       replies: rows.map((r) => ({
         id: r.id,
@@ -174,21 +223,30 @@ export const toggleVote = createServerFn({ method: "POST" })
 
 export const createForumPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { title: string; body: string; tags: string[] }) => {
-    const title = String(input.title ?? "").trim();
-    const body = String(input.body ?? "").trim();
-    if (title.length < 5 || title.length > 150) throw new Error("Title must be 5-150 characters");
-    if (body.length < 10 || body.length > 8000) throw new Error("Body must be 10-8000 characters");
-    const tags = (Array.isArray(input.tags) ? input.tags : [])
-      .map((t) => String(t).trim().toLowerCase().slice(0, 24))
-      .filter(Boolean)
-      .slice(0, 5);
-    return { title, body, tags };
-  })
+  .inputValidator(
+    (input: { title: string; body: string; tags: string[]; questionId?: string | null }) => {
+      const title = String(input.title ?? "").trim();
+      const body = String(input.body ?? "").trim();
+      if (title.length < 5 || title.length > 150) throw new Error("Title must be 5-150 characters");
+      if (body.length < 10 || body.length > 8000)
+        throw new Error("Body must be 10-8000 characters");
+      const tags = (Array.isArray(input.tags) ? input.tags : [])
+        .map((t) => String(t).trim().toLowerCase().slice(0, 24))
+        .filter(Boolean)
+        .slice(0, 5);
+      return { title, body, tags, questionId: input.questionId ? String(input.questionId) : null };
+    },
+  )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { data: row, error } = await context.supabase
       .from("forum_posts")
-      .insert({ ...data, user_id: context.userId })
+      .insert({
+        title: data.title,
+        body: data.body,
+        tags: data.tags,
+        question_id: data.questionId,
+        user_id: context.userId,
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -212,6 +270,36 @@ export const createForumReply = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Author-or-staff only (enforced by the same "users update own posts" RLS policy as edits). */
+export const acceptReply = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { postId: string; replyId: string | null }) => ({
+    postId: String(input.postId),
+    replyId: input.replyId ? String(input.replyId) : null,
+  }))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    if (data.replyId) {
+      const { data: reply } = await context.supabase
+        .from("forum_replies")
+        .select("post_id")
+        .eq("id", data.replyId)
+        .maybeSingle();
+      if (!reply || reply.post_id !== data.postId) {
+        throw new Error("That reply does not belong to this post");
+      }
+    }
+
+    const { data: updated, error } = await context.supabase
+      .from("forum_posts")
+      .update({ accepted_reply_id: data.replyId })
+      .eq("id", data.postId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!updated) throw new Error("Forbidden: only the post author or staff can accept an answer");
+    return { ok: true };
+  });
+
 export const deleteForumPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { postId: string }) => ({ postId: String(input.postId) }))
@@ -225,8 +313,12 @@ export const updateForumPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { postId: string; title: string; body: string }) => ({
     postId: String(input.postId),
-    title: String(input.title ?? "").trim().slice(0, 150),
-    body: String(input.body ?? "").trim().slice(0, 8000),
+    title: String(input.title ?? "")
+      .trim()
+      .slice(0, 150),
+    body: String(input.body ?? "")
+      .trim()
+      .slice(0, 8000),
   }))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase
@@ -241,10 +333,7 @@ export const deleteForumReply = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { replyId: string }) => ({ replyId: String(input.replyId) }))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const { error } = await context.supabase
-      .from("forum_replies")
-      .delete()
-      .eq("id", data.replyId);
+    const { error } = await context.supabase.from("forum_replies").delete().eq("id", data.replyId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

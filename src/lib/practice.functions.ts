@@ -2,9 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const getPracticeCatalog = createServerFn({ method: "GET" }).handler(async () => {
-  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import(
-    "@/lib/practice.server"
-  );
+  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import("@/lib/practice.server");
   const [languages, questions, graph] = await Promise.all([
     fetchLanguages(),
     fetchQuestions("practice"),
@@ -14,9 +12,7 @@ export const getPracticeCatalog = createServerFn({ method: "GET" }).handler(asyn
 });
 
 export const getCpCatalog = createServerFn({ method: "GET" }).handler(async () => {
-  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import(
-    "@/lib/practice.server"
-  );
+  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import("@/lib/practice.server");
   const [languages, questions, graph] = await Promise.all([
     fetchLanguages(),
     fetchQuestions("cp"),
@@ -24,7 +20,6 @@ export const getCpCatalog = createServerFn({ method: "GET" }).handler(async () =
   ]);
   return { languages, questions, topics: graph.topics, questionTopics: graph.questionTopics };
 });
-
 
 export const getQuestion = createServerFn({ method: "POST" })
   .inputValidator((input: { slug: string }) => ({ slug: String(input.slug) }))
@@ -47,4 +42,22 @@ export const getSolvedQuestions = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { fetchSolvedIds } = await import("@/lib/practice.server");
     return { solved: await fetchSolvedIds(context.userId) };
+  });
+
+export const getMyCpRating = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ rating: number }> => {
+    const { data } = await context.supabase
+      .from("profiles")
+      .select("cp_rating")
+      .eq("id", context.userId)
+      .maybeSingle();
+    return { rating: data?.cp_rating ?? 1200 };
+  });
+
+export const getTopicLeaderboard = createServerFn({ method: "POST" })
+  .inputValidator((input: { topicSlug: string }) => ({ topicSlug: String(input.topicSlug) }))
+  .handler(async ({ data }) => {
+    const { fetchTopicLeaderboard } = await import("@/lib/practice.server");
+    return { topicSlug: data.topicSlug, rows: await fetchTopicLeaderboard(data.topicSlug) };
   });

@@ -22,6 +22,12 @@ export type AdminTestCase = {
   is_sample: boolean;
 };
 
+export type AdminHint = {
+  id?: string;
+  hint_text: string;
+  points_penalty: number;
+};
+
 export type AdminQuestionDetail = {
   id: string;
   title: string;
@@ -41,6 +47,9 @@ export type AdminQuestionDetail = {
   submissions: number;
   testCases: AdminTestCase[];
   topicIds: string[];
+  editorial: string | null;
+  editorial_video_id: string | null;
+  hints: AdminHint[];
 };
 
 async function assertStaff(
@@ -64,19 +73,25 @@ export const listAdminQuestions = createServerFn({ method: "POST" })
       await assertStaff(context.supabase as never, context.userId);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-      const [{ data: questions }, { data: languages }, { data: topics }, { data: links }, { data: subs }, { data: tests }] =
-        await Promise.all([
-          supabaseAdmin
-            .from("questions")
-            .select("id, title, slug, category, difficulty, points, language_id, is_archived")
-            .order("title")
-            .limit(1000),
-          supabaseAdmin.from("languages").select("id, name, slug").order("name"),
-          supabaseAdmin.from("topics").select("id, name, slug").order("order_index"),
-          supabaseAdmin.from("question_topics").select("question_id, topic_id").limit(5000),
-          supabaseAdmin.from("submissions").select("question_id").limit(10000),
-          supabaseAdmin.from("test_cases").select("question_id").limit(10000),
-        ]);
+      const [
+        { data: questions },
+        { data: languages },
+        { data: topics },
+        { data: links },
+        { data: subs },
+        { data: tests },
+      ] = await Promise.all([
+        supabaseAdmin
+          .from("questions")
+          .select("id, title, slug, category, difficulty, points, language_id, is_archived")
+          .order("title")
+          .limit(1000),
+        supabaseAdmin.from("languages").select("id, name, slug").order("name"),
+        supabaseAdmin.from("topics").select("id, name, slug").order("order_index"),
+        supabaseAdmin.from("question_topics").select("question_id, topic_id").limit(5000),
+        supabaseAdmin.from("submissions").select("question_id").limit(10000),
+        supabaseAdmin.from("test_cases").select("question_id").limit(10000),
+      ]);
 
       const topicNameById = new Map((topics ?? []).map((t) => [t.id, t.name] as const));
       const topicsByQuestion = new Map<string, string[]>();
@@ -119,13 +134,13 @@ export const getAdminQuestion = createServerFn({ method: "POST" })
     const { data: q } = await supabaseAdmin
       .from("questions")
       .select(
-        "id, title, slug, category, difficulty, description, constraints, starter_code, points, language_id, time_limit_ms, memory_limit_mb, sql_setup, sample_table, is_archived",
+        "id, title, slug, category, difficulty, description, constraints, starter_code, points, language_id, time_limit_ms, memory_limit_mb, sql_setup, sample_table, is_archived, editorial, editorial_video_id",
       )
       .eq("id", data.questionId)
       .maybeSingle();
     if (!q) return null;
 
-    const [{ data: tests }, { data: links }, { count }] = await Promise.all([
+    const [{ data: tests }, { data: links }, { count }, { data: hints }] = await Promise.all([
       supabaseAdmin
         .from("test_cases")
         .select("id, input, expected_output, is_sample")
@@ -136,6 +151,11 @@ export const getAdminQuestion = createServerFn({ method: "POST" })
         .from("submissions")
         .select("id", { count: "exact", head: true })
         .eq("question_id", q.id),
+      supabaseAdmin
+        .from("question_hints")
+        .select("id, hint_text, points_penalty")
+        .eq("question_id", q.id)
+        .order("order_index"),
     ]);
 
     return {
@@ -148,6 +168,11 @@ export const getAdminQuestion = createServerFn({ method: "POST" })
         is_sample: t.is_sample,
       })),
       topicIds: (links ?? []).map((l) => l.topic_id),
+      hints: (hints ?? []).map((h) => ({
+        id: h.id,
+        hint_text: h.hint_text,
+        points_penalty: h.points_penalty,
+      })),
     };
   });
 
@@ -168,12 +193,17 @@ type SavePayload = {
   is_archived?: boolean;
   testCases: AdminTestCase[];
   topicIds: string[];
+  editorial?: string | null;
+  editorial_video_id?: string | null;
+  hints?: AdminHint[];
 };
 
 export const saveQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: SavePayload) => {
-    const title = String(input.title ?? "").trim().slice(0, 200);
+    const title = String(input.title ?? "")
+      .trim()
+      .slice(0, 200);
     if (!title) throw new Error("Title is required");
     const slug =
       String(input.slug ?? "")
@@ -205,6 +235,14 @@ export const saveQuestion = createServerFn({ method: "POST" })
         is_sample: Boolean(t.is_sample),
       })),
       topicIds: (input.topicIds ?? []).map(String).slice(0, 10),
+      editorial: input.editorial ? String(input.editorial).slice(0, 20000) : null,
+      editorial_video_id: input.editorial_video_id
+        ? String(input.editorial_video_id).slice(0, 60)
+        : null,
+      hints: (input.hints ?? []).slice(0, 10).map((h) => ({
+        hint_text: String(h.hint_text ?? "").slice(0, 2000),
+        points_penalty: Math.max(0, Math.min(1000, Math.round(Number(h.points_penalty) || 0))),
+      })),
     };
   })
   .handler(async ({ context, data }): Promise<{ id: string }> => {
@@ -225,6 +263,8 @@ export const saveQuestion = createServerFn({ method: "POST" })
       memory_limit_mb: data.memory_limit_mb,
       sql_setup: data.sql_setup,
       is_archived: data.is_archived,
+      editorial: data.editorial,
+      editorial_video_id: data.editorial_video_id,
     };
 
     let questionId = data.id;
@@ -261,6 +301,20 @@ export const saveQuestion = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin
         .from("question_topics")
         .insert(data.topicIds.map((topic_id) => ({ question_id: questionId!, topic_id })));
+      if (error) throw new Error(error.message);
+    }
+
+    // Hints are fully replaced on every save, same as test cases and topics.
+    await supabaseAdmin.from("question_hints").delete().eq("question_id", questionId);
+    if (data.hints.length) {
+      const { error } = await supabaseAdmin.from("question_hints").insert(
+        data.hints.map((h, order_index) => ({
+          question_id: questionId!,
+          hint_text: h.hint_text,
+          points_penalty: h.points_penalty,
+          order_index,
+        })),
+      );
       if (error) throw new Error(error.message);
     }
 

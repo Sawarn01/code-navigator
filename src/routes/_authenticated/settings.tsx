@@ -13,6 +13,7 @@ import {
   updateNotificationPrefs,
   type NotificationPrefs,
 } from "@/lib/notifications.functions";
+import { getLeaderboardVisibility, setLeaderboardVisibility } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -20,7 +21,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { title: "Settings — Space" },
       {
         name: "description",
-        content: "Manage notification preferences, the weekly email digest, and your Space account.",
+        content:
+          "Manage notification preferences, the weekly email digest, and your Space account.",
       },
       { property: "og:title", content: "Settings — Space" },
       {
@@ -82,6 +84,8 @@ function SettingsPage() {
   const fetchPrefs = useServerFn(getNotificationPrefs);
   const savePrefs = useServerFn(updateNotificationPrefs);
   const removeAccount = useServerFn(deleteMyAccount);
+  const fetchVisibility = useServerFn(getLeaderboardVisibility);
+  const saveVisibility = useServerFn(setLeaderboardVisibility);
 
   const [password, setPassword] = useState("");
   const [confirmText, setConfirmText] = useState("");
@@ -107,6 +111,30 @@ function SettingsPage() {
     },
     onSuccess: () => toast.success("Preferences saved"),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["notification-prefs"] }),
+  });
+
+  const { data: visibility } = useQuery({
+    queryKey: ["leaderboard-visibility"],
+    queryFn: () => fetchVisibility(),
+  });
+
+  const visibilityMutation = useMutation({
+    mutationFn: (optedOut: boolean) => saveVisibility({ data: { optedOut } }),
+    onMutate: async (optedOut) => {
+      await queryClient.cancelQueries({ queryKey: ["leaderboard-visibility"] });
+      const previous = queryClient.getQueryData<{ optedOut: boolean }>(["leaderboard-visibility"]);
+      queryClient.setQueryData(["leaderboard-visibility"], { optedOut });
+      return { previous };
+    },
+    onError: (e: Error, _optedOut, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["leaderboard-visibility"], ctx.previous);
+      toast.error(e.message);
+    },
+    onSuccess: (_data, optedOut) =>
+      toast.success(
+        optedOut ? "You're hidden from leaderboards" : "You're visible on leaderboards again",
+      ),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["leaderboard-visibility"] }),
   });
 
   const passwordMutation = useMutation({
@@ -183,7 +211,8 @@ function SettingsPage() {
           <BentoCard className="lg:col-span-5" delay={0.05}>
             <h2 className="font-display text-lg font-bold text-indigo-900">Weekly email digest</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              A Monday recap of your points, problems solved, rank movement and the events coming up.
+              A Monday recap of your points, problems solved, rank movement and the events coming
+              up.
             </p>
             <div className="mt-5 flex items-center justify-between gap-4 rounded-xl surface-tint px-4 py-3">
               <p className="text-sm font-semibold text-indigo-900">Send me the digest</p>
@@ -192,6 +221,25 @@ function SettingsPage() {
                 checked={prefs?.email_digest ?? true}
                 disabled={!prefs || prefsMutation.isPending}
                 onChange={(v) => prefsMutation.mutate({ email_digest: v })}
+              />
+            </div>
+          </BentoCard>
+
+          <BentoCard className="lg:col-span-6" delay={0.08}>
+            <h2 className="font-display text-lg font-bold text-indigo-900">
+              Leaderboard visibility
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Hide yourself from the global, topic and group leaderboards. Your points, badges and
+              streak keep counting either way.
+            </p>
+            <div className="mt-5 flex items-center justify-between gap-4 rounded-xl surface-tint px-4 py-3">
+              <p className="text-sm font-semibold text-indigo-900">Hide me from leaderboards</p>
+              <Switch
+                label="Hide me from leaderboards"
+                checked={visibility?.optedOut ?? false}
+                disabled={!visibility || visibilityMutation.isPending}
+                onChange={(v) => visibilityMutation.mutate(v)}
               />
             </div>
           </BentoCard>

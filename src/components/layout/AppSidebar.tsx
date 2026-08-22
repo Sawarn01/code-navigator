@@ -3,6 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  Award,
   BookOpen,
   Library,
   Code2,
@@ -12,6 +13,7 @@ import {
   PlayCircle,
   MessagesSquare,
   Users,
+  GraduationCap,
   ChevronDown,
   Menu,
   X,
@@ -55,6 +57,7 @@ const baseTabs: Tab[] = [
     items: [
       { label: "Events", to: "/events", icon: Rocket },
       { label: "Leaderboard", to: "/leaderboard", icon: Medal },
+      { label: "Badges", to: "/badges", icon: Award },
     ],
   },
   {
@@ -71,6 +74,7 @@ const baseTabs: Tab[] = [
     items: [
       { label: "Forum", to: "/forum", icon: MessagesSquare },
       { label: "Groups", to: "/groups", icon: Users },
+      { label: "Mentorship", to: "/mentorship", icon: GraduationCap },
     ],
   },
 ];

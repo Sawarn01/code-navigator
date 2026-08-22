@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
-import { Swords, Timer } from "lucide-react";
+import { Gauge, Swords, Timer } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { DifficultyBadge } from "@/components/practice/DifficultyBadge";
 import { ProblemWorkspace } from "@/components/practice/ProblemWorkspace";
-import { getCpCatalog } from "@/lib/practice.functions";
+import { getCpCatalog, getMyCpRating } from "@/lib/practice.functions";
+import { useAuth } from "@/hooks/useAuth";
 
 const cpQuery = queryOptions({ queryKey: ["cp-catalog"], queryFn: () => getCpCatalog() });
 
@@ -52,6 +54,13 @@ function CpZone() {
   const { data } = useSuspenseQuery(cpQuery);
   const [selected, setSelected] = useState<string | null>(null);
   const [session, setSession] = useState<number | null>(null);
+  const { isAuthenticated } = useAuth();
+  const fetchRating = useServerFn(getMyCpRating);
+  const { data: ratingData } = useQuery({
+    queryKey: ["my-cp-rating"],
+    queryFn: () => fetchRating(),
+    enabled: isAuthenticated,
+  });
 
   const problems = useMemo(
     () => [...data.questions].sort((a, b) => a.points - b.points || a.title.localeCompare(b.title)),
@@ -78,6 +87,11 @@ function CpZone() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {ratingData && (
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-700 bg-indigo-900/60 px-3 py-2 text-xs font-semibold text-indigo-100">
+                  <Gauge className="size-3.5" /> Rating: {ratingData.rating}
+                </span>
+              )}
               {SESSIONS.map((s) => (
                 <motion.button
                   key={s.seconds}
@@ -104,15 +118,24 @@ function CpZone() {
             </p>
             <ul className="mt-2 space-y-1.5">
               {problems.map((q, i) => (
-                <motion.li key={q.id} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
+                <motion.li
+                  key={q.id}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.03 }}
+                >
                   <button
                     onClick={() => setSelected(q.slug)}
                     className={`w-full rounded-xl border px-3 py-2 text-left transition-colors ${
-                      activeSlug === q.slug ? "border-indigo-300 bg-indigo-50" : "border-transparent hover:bg-accent"
+                      activeSlug === q.slug
+                        ? "border-indigo-300 bg-indigo-50"
+                        : "border-transparent hover:bg-accent"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-medium text-indigo-900">{q.title}</span>
+                      <span className="truncate text-sm font-medium text-indigo-900">
+                        {q.title}
+                      </span>
                       {q.tier && (
                         <span className="shrink-0 rounded-full surface-tint px-2 py-0.5 text-[10px] font-bold text-indigo-700">
                           {q.tier}

@@ -119,7 +119,8 @@ export async function runAgainstTests(params: {
         timeoutMs: question.time_limit_ms,
         memoryMb: question.memory_limit_mb,
       });
-      const passed = exec.status === "success" && normalize(exec.stdout) === normalize(t.expected_output ?? "");
+      const passed =
+        exec.status === "success" && normalize(exec.stdout) === normalize(t.expected_output ?? "");
       results.push({
         index: index++,
         passed,
@@ -149,8 +150,11 @@ export async function recordSubmission(params: {
   code: string;
   accepted: boolean;
   runtimeMs: number | null;
+  testsPassed: number;
+  testsTotal: number;
 }) {
-  const { userId, question, languageSlug, code, accepted, runtimeMs } = params;
+  const { userId, question, languageSlug, code, accepted, runtimeMs, testsPassed, testsTotal } =
+    params;
 
   const { data: prior } = await supabaseAdmin
     .from("submissions")
@@ -161,19 +165,59 @@ export async function recordSubmission(params: {
     .limit(1);
 
   const firstSolve = accepted && (prior ?? []).length === 0;
-  const pointsAwarded = firstSolve ? question.points : 0;
+  const hintPenalty = firstSolve ? await hintPenaltyFor(userId, question.id) : 0;
+  const pointsAwarded = firstSolve ? Math.max(question.points - hintPenalty, 0) : 0;
+  // Informational only — points above stay binary (first full-pass solve).
+  const score = testsTotal > 0 ? Math.round((testsPassed / testsTotal) * 10000) / 100 : null;
 
-  const { error } = await supabaseAdmin.from("submissions").insert({
-    user_id: userId,
-    question_id: question.id,
-    code,
-    language: languageSlug,
-    status: accepted ? "accepted" : "wrong_answer",
-    runtime_ms: runtimeMs,
-    points_awarded: pointsAwarded,
-    is_first_solve: firstSolve,
-  });
+  const { data: inserted, error } = await supabaseAdmin
+    .from("submissions")
+    .insert({
+      user_id: userId,
+      question_id: question.id,
+      code,
+      language: languageSlug,
+      status: accepted ? "accepted" : "wrong_answer",
+      runtime_ms: runtimeMs,
+      points_awarded: pointsAwarded,
+      is_first_solve: firstSolve,
+      test_cases_passed: testsPassed,
+      test_cases_total: testsTotal,
+      score,
+    })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
+
+  let newRating: number | null = null;
+  if (firstSolve && question.category === "cp") {
+    const { data: rating } = await supabaseAdmin.rpc("apply_cp_rating_update", {
+      _user_id: userId,
+      _question_id: question.id,
+      _submission_id: inserted.id,
+    });
+    newRating = (rating as number | null) ?? null;
+  }
+
+  let dailyChallengeCompleted = false;
+  if (accepted) {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: daily } = await supabaseAdmin
+      .from("daily_challenges")
+      .select("id")
+      .eq("challenge_date", today)
+      .eq("question_id", question.id)
+      .maybeSingle();
+    if (daily) {
+      const { error: completionError } = await supabaseAdmin
+        .from("daily_challenge_completions")
+        .insert({ user_id: userId, daily_challenge_id: daily.id, submission_id: inserted.id });
+      if (completionError && !completionError.message.toLowerCase().includes("duplicate")) {
+        throw new Error(completionError.message);
+      }
+      dailyChallengeCompleted = true;
+    }
+  }
 
   let newBadges: string[] = [];
   if (pointsAwarded > 0) {
@@ -197,7 +241,35 @@ export async function recordSubmission(params: {
     .map((b) => (b as unknown as { badges?: { name?: string } }).badges?.name)
     .filter((n): n is string => !!n);
 
-  return { firstSolve, pointsAwarded, newBadges };
+  return {
+    firstSolve,
+    pointsAwarded,
+    newBadges,
+    testCasesPassed: testsPassed,
+    testCasesTotal: testsTotal,
+    score,
+    newRating,
+    dailyChallengeCompleted,
+  };
+}
+
+/** Sum of point penalties for hints this user has already revealed on this question. */
+async function hintPenaltyFor(userId: string, questionId: string): Promise<number> {
+  const { data: hints } = await supabaseAdmin
+    .from("question_hints")
+    .select("id, points_penalty")
+    .eq("question_id", questionId);
+  if (!hints?.length) return 0;
+
+  const hintIds = hints.map((h) => h.id);
+  const { data: reveals } = await supabaseAdmin
+    .from("question_hint_reveals")
+    .select("hint_id")
+    .eq("user_id", userId)
+    .in("hint_id", hintIds);
+
+  const revealedIds = new Set((reveals ?? []).map((r) => r.hint_id));
+  return hints.filter((h) => revealedIds.has(h.id)).reduce((sum, h) => sum + h.points_penalty, 0);
 }
 
 /** Run arbitrary code against ad-hoc test cases (used by the admin question builder preview). */

@@ -18,6 +18,8 @@ export type BuilderLesson = {
   practice_topic: string | null;
   duration_minutes: number;
   resources: BuilderResource[];
+  drip_after_days: number | null;
+  release_at: string | null;
 };
 
 export type BuilderSection = {
@@ -34,6 +36,7 @@ export type BuilderCourse = {
   thumbnail_url: string | null;
   language_id: string | null;
   sections: BuilderSection[];
+  prerequisiteIds: string[];
 };
 
 async function assertStaff(
@@ -85,23 +88,39 @@ export const getBuilderCourse = createServerFn({ method: "POST" })
       ? await context.supabase
           .from("course_lessons")
           .select(
-            "id, section_id, title, youtube_video_id, order_index, has_practice, practice_topic, duration_minutes",
+            "id, section_id, title, youtube_video_id, order_index, has_practice, practice_topic, duration_minutes, drip_after_days, release_at",
           )
           .in("section_id", sectionIds)
           .order("order_index")
       : { data: [] as never[] };
 
     const lessonIds = (lessons ?? []).map((l) => l.id);
-    const { data: resources } = lessonIds.length
-      ? await context.supabase
-          .from("lesson_resources")
-          .select("id, lesson_id, title, file_url, type, order_index")
-          .in("lesson_id", lessonIds)
-          .order("order_index")
-      : { data: [] as { id: string; lesson_id: string; title: string; file_url: string; type: string; order_index: number }[] };
+    const [{ data: resources }, { data: prereqLinks }] = await Promise.all([
+      lessonIds.length
+        ? context.supabase
+            .from("lesson_resources")
+            .select("id, lesson_id, title, file_url, type, order_index")
+            .in("lesson_id", lessonIds)
+            .order("order_index")
+        : Promise.resolve({
+            data: [] as {
+              id: string;
+              lesson_id: string;
+              title: string;
+              file_url: string;
+              type: string;
+              order_index: number;
+            }[],
+          }),
+      context.supabase
+        .from("course_prerequisites")
+        .select("prerequisite_course_id")
+        .eq("course_id", course.id),
+    ]);
 
     return {
       ...course,
+      prerequisiteIds: (prereqLinks ?? []).map((p) => p.prerequisite_course_id),
       sections: (sections ?? []).map((s) => ({
         ...s,
         lessons: (lessons ?? [])
@@ -114,6 +133,29 @@ export const getBuilderCourse = createServerFn({ method: "POST" })
           })),
       })),
     };
+  });
+
+export const saveCoursePrerequisites = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { courseId: string; prerequisiteIds: string[] }) => ({
+    courseId: String(input.courseId),
+    prerequisiteIds: [...new Set((input.prerequisiteIds ?? []).map(String))]
+      .filter((id) => id !== String(input.courseId))
+      .slice(0, 20),
+  }))
+  .handler(async ({ context, data }): Promise<{ ok: true }> => {
+    await assertStaff(context.supabase as never, context.userId);
+    await context.supabase.from("course_prerequisites").delete().eq("course_id", data.courseId);
+    if (data.prerequisiteIds.length) {
+      const { error } = await context.supabase.from("course_prerequisites").insert(
+        data.prerequisiteIds.map((prerequisite_course_id) => ({
+          course_id: data.courseId,
+          prerequisite_course_id,
+        })),
+      );
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
   });
 
 export const saveCourse = createServerFn({ method: "POST" })
@@ -219,6 +261,8 @@ export const saveLesson = createServerFn({ method: "POST" })
       practice_topic?: string | null;
       duration_minutes?: number;
       order_index?: number;
+      drip_after_days?: number | null;
+      release_at?: string | null;
     }) => ({
       id: input.id ? String(input.id) : null,
       sectionId: String(input.sectionId),
@@ -228,6 +272,11 @@ export const saveLesson = createServerFn({ method: "POST" })
       practice_topic: input.practice_topic ? String(input.practice_topic).slice(0, 120) : null,
       duration_minutes: Math.max(0, Math.min(600, Number(input.duration_minutes ?? 10))),
       order_index: Number(input.order_index ?? 0),
+      drip_after_days:
+        input.drip_after_days === null || input.drip_after_days === undefined
+          ? null
+          : Math.max(0, Math.round(Number(input.drip_after_days))),
+      release_at: input.release_at ? new Date(input.release_at).toISOString() : null,
     }),
   )
   .handler(async ({ context, data }): Promise<{ id: string }> => {
@@ -238,6 +287,8 @@ export const saveLesson = createServerFn({ method: "POST" })
       has_practice: data.has_practice,
       practice_topic: data.practice_topic,
       duration_minutes: data.duration_minutes,
+      drip_after_days: data.drip_after_days,
+      release_at: data.release_at,
     };
     if (data.id) {
       const { error } = await context.supabase
@@ -362,7 +413,10 @@ export const getCourseImpact = createServerFn({ method: "POST" })
     const [{ data: sections }, { data: lessons }, { data: progress }] = await Promise.all([
       supabaseAdmin.from("course_sections").select("id, course_id").limit(5000),
       supabaseAdmin.from("course_lessons").select("id, section_id").limit(10000),
-      supabaseAdmin.from("lesson_progress").select("user_id, lesson_id").limit(50000),
+      // "completed" only exists since Wave 7's watch-time tracking started
+      // creating in-progress rows too — without this filter, a learner who
+      // merely started every lesson would be miscounted as having finished.
+      supabaseAdmin.from("lesson_progress").select("user_id, lesson_id, completed").limit(50000),
     ]);
 
     const courseBySection = new Map((sections ?? []).map((s) => [s.id, s.course_id] as const));
@@ -375,19 +429,25 @@ export const getCourseImpact = createServerFn({ method: "POST" })
       lessonsPerCourse.set(courseId, (lessonsPerCourse.get(courseId) ?? 0) + 1);
     }
 
+    const engagedByCourseUser = new Set<string>();
     const doneByCourseUser = new Map<string, number>();
     for (const p of progress ?? []) {
       const courseId = courseByLesson.get(p.lesson_id);
       if (!courseId) continue;
       const key = `${courseId}|${p.user_id}`;
-      doneByCourseUser.set(key, (doneByCourseUser.get(key) ?? 0) + 1);
+      engagedByCourseUser.add(key);
+      if (p.completed) doneByCourseUser.set(key, (doneByCourseUser.get(key) ?? 0) + 1);
     }
 
     const learners = new Map<string, number>();
+    for (const key of engagedByCourseUser) {
+      const courseId = key.split("|")[0]!;
+      learners.set(courseId, (learners.get(courseId) ?? 0) + 1);
+    }
+
     const finishers = new Map<string, number>();
     for (const [key, done] of doneByCourseUser) {
       const courseId = key.split("|")[0]!;
-      learners.set(courseId, (learners.get(courseId) ?? 0) + 1);
       const total = lessonsPerCourse.get(courseId) ?? 0;
       if (total > 0 && done >= total) finishers.set(courseId, (finishers.get(courseId) ?? 0) + 1);
     }

@@ -125,7 +125,11 @@ export const getPlatformAnalytics = createServerFn({ method: "POST" })
       supabaseAdmin.from("questions").select("id, difficulty").limit(5000),
       supabaseAdmin.from("languages").select("name, slug").limit(100),
       supabaseAdmin.from("study_groups").select("id").limit(5000),
-      supabaseAdmin.from("events").select("id, start_time").gte("start_time", new Date(now).toISOString()).limit(1000),
+      supabaseAdmin
+        .from("events")
+        .select("id, start_time")
+        .gte("start_time", new Date(now).toISOString())
+        .limit(1000),
     ]);
 
     const profiles = profilesRes.data ?? [];
@@ -287,7 +291,9 @@ export const getQuestionAnalytics = createServerFn({ method: "POST" })
       .map((q) => {
         const a = agg.get(q.id);
         const attempts = a?.attempts ?? 0;
-        const solvedUsers = a ? Array.from(a.perUser.values()).filter((u) => u.solvedAt !== null) : [];
+        const solvedUsers = a
+          ? Array.from(a.perUser.values()).filter((u) => u.solvedAt !== null)
+          : [];
         const solvers = solvedUsers.length;
         const passRate = attempts > 0 ? (a!.accepted / attempts) * 100 : 0;
         const avgAttemptsToSolve =
@@ -316,6 +322,74 @@ export const getQuestionAnalytics = createServerFn({ method: "POST" })
         };
       })
       .sort((a, b) => b.attempts - a.attempts);
+  });
+
+export type LessonDropOffRow = {
+  lessonId: string;
+  title: string;
+  sectionTitle: string;
+  durationSeconds: number;
+  started: number;
+  completed: number;
+  avgWatchSeconds: number;
+};
+
+/** Funnel of who reached vs. finished each lesson in a course, for staff. */
+export const getLessonDropOff = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { courseId: string }) => ({ courseId: String(input.courseId) }))
+  .handler(async ({ context, data }): Promise<LessonDropOffRow[]> => {
+    await requireStaff(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: sections } = await supabaseAdmin
+      .from("course_sections")
+      .select("id, title, order_index")
+      .eq("course_id", data.courseId)
+      .order("order_index");
+    const sectionById = new Map((sections ?? []).map((s) => [s.id, s]));
+    const sectionIds = (sections ?? []).map((s) => s.id);
+    if (!sectionIds.length) return [];
+
+    const { data: lessons } = await supabaseAdmin
+      .from("course_lessons")
+      .select("id, title, order_index, section_id, duration_minutes")
+      .in("section_id", sectionIds);
+    if (!lessons?.length) return [];
+
+    const lessonIds = lessons.map((l) => l.id);
+    const { data: progress } = await supabaseAdmin
+      .from("lesson_progress")
+      .select("lesson_id, completed, watch_seconds")
+      .in("lesson_id", lessonIds);
+
+    const byLesson = new Map<string, { started: number; completed: number; totalWatch: number }>();
+    for (const row of progress ?? []) {
+      const agg = byLesson.get(row.lesson_id) ?? { started: 0, completed: 0, totalWatch: 0 };
+      agg.started += 1;
+      if (row.completed) agg.completed += 1;
+      agg.totalWatch += row.watch_seconds ?? 0;
+      byLesson.set(row.lesson_id, agg);
+    }
+
+    return [...lessons]
+      .sort((a, b) => {
+        const sa = sectionById.get(a.section_id)?.order_index ?? 0;
+        const sb = sectionById.get(b.section_id)?.order_index ?? 0;
+        return sa - sb || a.order_index - b.order_index;
+      })
+      .map((l) => {
+        const agg = byLesson.get(l.id) ?? { started: 0, completed: 0, totalWatch: 0 };
+        return {
+          lessonId: l.id,
+          title: l.title,
+          sectionTitle: sectionById.get(l.section_id)?.title ?? "",
+          durationSeconds: (l.duration_minutes ?? 0) * 60,
+          started: agg.started,
+          completed: agg.completed,
+          avgWatchSeconds: agg.started > 0 ? Math.round(agg.totalWatch / agg.started) : 0,
+        };
+      });
   });
 
 /* ---------------------------- mentor reporting ---------------------------- */

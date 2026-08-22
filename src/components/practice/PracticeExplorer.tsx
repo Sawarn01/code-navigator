@@ -28,6 +28,7 @@ export function PracticeExplorer({
   questionTopics,
   initialLanguage = "all",
   initialSearch = "",
+  initialSlug,
   lockedTopic,
   mode = "practice",
 }: {
@@ -37,6 +38,7 @@ export function PracticeExplorer({
   questionTopics: Record<string, string[]>;
   initialLanguage?: string;
   initialSearch?: string;
+  initialSlug?: string;
   lockedTopic?: string;
   mode?: "practice" | "cp";
 }) {
@@ -103,8 +105,7 @@ export function PracticeExplorer({
     solved,
   ]);
 
-
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(initialSlug ?? null);
   const activeSlug =
     selected && filtered.some((q) => q.slug === selected) ? selected : (filtered[0]?.slug ?? null);
 
@@ -239,7 +240,6 @@ export function PracticeExplorer({
               </button>
             </li>
           )}
-
         </ul>
       </aside>
 

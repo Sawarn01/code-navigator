@@ -2,15 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   Activity,
   ArrowRight,
@@ -27,6 +19,7 @@ import {
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
+import { ActivityFeed } from "@/components/profile/ActivityFeed";
 import { useAuth } from "@/hooks/useAuth";
 import { getProfile } from "@/lib/profile.functions";
 import { getRecommendedQuestion } from "@/lib/topics.functions";
@@ -98,7 +91,15 @@ function DashboardPage() {
   );
 }
 
-function Stat({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
+function Stat({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+}) {
   return (
     <BentoCard>
       <div className="flex items-center gap-3">
@@ -139,17 +140,23 @@ function StudentView() {
     queryFn: () => fetchNotifications(),
   });
 
-  const enrolled = (courses ?? [])
-    .filter((c) => (progress?.byCourse[c.id] ?? 0) > 0)
-    .slice(0, 4);
+  const enrolled = (courses ?? []).filter((c) => (progress?.byCourse[c.id] ?? 0) > 0).slice(0, 4);
   const upcoming = (events?.events ?? [])
     .filter((e) => new Date(e.start_time).getTime() > Date.now())
     .slice(0, 4);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Stat label="Current streak" value={`${profile?.streak ?? 0}d`} icon={<Flame className="size-5" />} />
-      <Stat label="Points" value={profile?.profile?.points ?? 0} icon={<Sparkles className="size-5" />} />
+      <Stat
+        label="Current streak"
+        value={`${profile?.streak ?? 0}d`}
+        icon={<Flame className="size-5" />}
+      />
+      <Stat
+        label="Points"
+        value={profile?.profile?.points ?? 0}
+        icon={<Sparkles className="size-5" />}
+      />
       <Stat
         label="Rank"
         value={profile?.rank ? `#${profile.rank}` : "—"}
@@ -163,7 +170,9 @@ function StudentView() {
 
       <BentoCard className="md:col-span-2 lg:col-span-3">
         <h2 className="text-lg font-semibold text-indigo-900">Activity</h2>
-        <p className="text-xs text-muted-foreground">Accepted submissions over the last 26 weeks.</p>
+        <p className="text-xs text-muted-foreground">
+          Accepted submissions over the last 26 weeks.
+        </p>
         <div className="mt-3 overflow-x-auto">
           <ActivityHeatmap days={profile?.activity ?? []} />
         </div>
@@ -252,6 +261,13 @@ function StudentView() {
       </BentoCard>
 
       <BentoCard>
+        <h2 className="text-lg font-semibold text-indigo-900">Recent activity</h2>
+        <div className="mt-3">
+          <ActivityFeed limit={6} />
+        </div>
+      </BentoCard>
+
+      <BentoCard>
         <h2 className="text-lg font-semibold text-indigo-900">Recent notifications</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {(notifications?.items ?? []).slice(0, 5).map((n) => (
@@ -305,8 +321,16 @@ function ManagerView() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Stat label="Mentees" value={list.length} icon={<Users className="size-5" />} />
       <Stat label="Avg points" value={cohort[0]!.cohort} icon={<Sparkles className="size-5" />} />
-      <Stat label="Avg streak" value={`${cohort[1]!.cohort}d`} icon={<Flame className="size-5" />} />
-      <Stat label="Avg solved" value={cohort[2]!.cohort} icon={<CircleCheck className="size-5" />} />
+      <Stat
+        label="Avg streak"
+        value={`${cohort[1]!.cohort}d`}
+        icon={<Flame className="size-5" />}
+      />
+      <Stat
+        label="Avg solved"
+        value={cohort[2]!.cohort}
+        icon={<CircleCheck className="size-5" />}
+      />
 
       <BentoCard className="md:col-span-2 lg:col-span-2">
         <h2 className="text-lg font-semibold text-indigo-900">Cohort vs platform</h2>
@@ -353,9 +377,17 @@ function ManagerView() {
       <BentoCard className="md:col-span-2 lg:col-span-4">
         <h2 className="text-lg font-semibold text-indigo-900">Quick actions</h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          <QuickLink to="/admin/questions" icon={<Plus className="size-4" />} label="Question builder" />
+          <QuickLink
+            to="/admin/questions"
+            icon={<Plus className="size-4" />}
+            label="Question builder"
+          />
           <QuickLink to="/admin" icon={<BookOpen className="size-4" />} label="Course builder" />
-          <QuickLink to="/reporting" icon={<Activity className="size-4" />} label="Student reporting" />
+          <QuickLink
+            to="/reporting"
+            icon={<Activity className="size-4" />}
+            label="Student reporting"
+          />
           <QuickLink to="/groups" icon={<Users className="size-4" />} label="Study groups" />
         </div>
       </BentoCard>
@@ -377,7 +409,11 @@ function AdminView() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Stat label="Total users" value={s?.totalUsers ?? 0} icon={<Users className="size-5" />} />
-      <Stat label="Active today" value={s?.dailyActive ?? 0} icon={<Activity className="size-5" />} />
+      <Stat
+        label="Active today"
+        value={s?.dailyActive ?? 0}
+        icon={<Activity className="size-5" />}
+      />
       <Stat
         label="Submissions today"
         value={s?.submissionsToday ?? 0}
@@ -393,9 +429,7 @@ function AdminView() {
         <h2 className="text-lg font-semibold text-indigo-900">System status</h2>
         <div
           className={`mt-3 flex items-start gap-3 rounded-xl border px-3 py-3 ${
-            piston?.reachable
-              ? "border-emerald-200 bg-emerald-50"
-              : "border-rose-200 bg-rose-50"
+            piston?.reachable ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"
           }`}
         >
           {piston?.reachable ? (
@@ -418,7 +452,11 @@ function AdminView() {
       <BentoCard className="md:col-span-2">
         <h2 className="text-lg font-semibold text-indigo-900">Quick actions</h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          <QuickLink to="/admin/questions" icon={<Plus className="size-4" />} label="Add question" />
+          <QuickLink
+            to="/admin/questions"
+            icon={<Plus className="size-4" />}
+            label="Add question"
+          />
           <QuickLink to="/admin" icon={<BookOpen className="size-4" />} label="Add course" />
           <QuickLink to="/admin" icon={<Users className="size-4" />} label="Manage users & roles" />
           <QuickLink

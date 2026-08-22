@@ -12,8 +12,57 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      activity_events: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       allowed_email_domains: {
         Row: {
           created_at: string
@@ -91,36 +140,68 @@ export type Database = {
           },
         ]
       }
+      course_enrollments: {
+        Row: {
+          course_id: string
+          enrolled_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          enrolled_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          enrolled_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_lessons: {
         Row: {
           created_at: string
+          drip_after_days: number | null
           duration_minutes: number
           has_practice: boolean
           id: string
           order_index: number
           practice_topic: string | null
+          release_at: string | null
           section_id: string
           title: string
           youtube_video_id: string | null
         }
         Insert: {
           created_at?: string
+          drip_after_days?: number | null
           duration_minutes?: number
           has_practice?: boolean
           id?: string
           order_index?: number
           practice_topic?: string | null
+          release_at?: string | null
           section_id: string
           title: string
           youtube_video_id?: string | null
         }
         Update: {
           created_at?: string
+          drip_after_days?: number | null
           duration_minutes?: number
           has_practice?: boolean
           id?: string
           order_index?: number
           practice_topic?: string | null
+          release_at?: string | null
           section_id?: string
           title?: string
           youtube_video_id?: string | null
@@ -131,6 +212,39 @@ export type Database = {
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "course_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_prerequisites: {
+        Row: {
+          course_id: string
+          created_at: string
+          prerequisite_course_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          prerequisite_course_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          prerequisite_course_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_prerequisites_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_prerequisites_prerequisite_course_id_fkey"
+            columns: ["prerequisite_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -275,6 +389,74 @@ export type Database = {
           },
         ]
       }
+      daily_challenge_completions: {
+        Row: {
+          completed_at: string
+          daily_challenge_id: string
+          id: string
+          submission_id: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          daily_challenge_id: string
+          id?: string
+          submission_id?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          daily_challenge_id?: string
+          id?: string
+          submission_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenge_completions_daily_challenge_id_fkey"
+            columns: ["daily_challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_challenge_completions_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_challenges: {
+        Row: {
+          challenge_date: string
+          created_at: string
+          id: string
+          question_id: string
+        }
+        Insert: {
+          challenge_date: string
+          created_at?: string
+          id?: string
+          question_id: string
+        }
+        Update: {
+          challenge_date?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenges_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dictionary_terms: {
         Row: {
           created_at: string
@@ -316,25 +498,69 @@ export type Database = {
           },
         ]
       }
+      event_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          event_id: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_feedback_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_registrations: {
         Row: {
+          checked_in_at: string | null
           event_id: string
           id: string
           registered_at: string
+          reminder_sent_at: string | null
+          status: string
           team_id: string | null
           user_id: string
         }
         Insert: {
+          checked_in_at?: string | null
           event_id: string
           id?: string
           registered_at?: string
+          reminder_sent_at?: string | null
+          status?: string
           team_id?: string | null
           user_id: string
         }
         Update: {
+          checked_in_at?: string | null
           event_id?: string
           id?: string
           registered_at?: string
+          reminder_sent_at?: string | null
+          status?: string
           team_id?: string | null
           user_id?: string
         }
@@ -358,6 +584,7 @@ export type Database = {
       events: {
         Row: {
           banner_url: string | null
+          capacity: number | null
           created_at: string
           description: string | null
           end_time: string | null
@@ -371,6 +598,7 @@ export type Database = {
         }
         Insert: {
           banner_url?: string | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
           end_time?: string | null
@@ -384,6 +612,7 @@ export type Database = {
         }
         Update: {
           banner_url?: string | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
           end_time?: string | null
@@ -399,9 +628,11 @@ export type Database = {
       }
       forum_posts: {
         Row: {
+          accepted_reply_id: string | null
           body: string
           created_at: string
           id: string
+          question_id: string | null
           tags: string[]
           title: string
           updated_at: string
@@ -409,9 +640,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted_reply_id?: string | null
           body: string
           created_at?: string
           id?: string
+          question_id?: string | null
           tags?: string[]
           title: string
           updated_at?: string
@@ -419,16 +652,33 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted_reply_id?: string | null
           body?: string
           created_at?: string
           id?: string
+          question_id?: string | null
           tags?: string[]
           title?: string
           updated_at?: string
           upvotes?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "forum_posts_accepted_reply_id_fkey"
+            columns: ["accepted_reply_id"]
+            isOneToOne: false
+            referencedRelation: "forum_replies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_posts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       forum_replies: {
         Row: {
@@ -503,6 +753,51 @@ export type Database = {
             columns: ["reply_id"]
             isOneToOne: false
             referencedRelation: "forum_replies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_at: string
+          group_id: string
+          id: string
+          question_id: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ends_at: string
+          group_id: string
+          id?: string
+          question_id: string
+          starts_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          group_id?: string
+          id?: string
+          question_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_challenges_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_challenges_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]
@@ -669,22 +964,31 @@ export type Database = {
       }
       lesson_progress: {
         Row: {
+          completed: boolean
           completed_at: string
           id: string
+          last_position_seconds: number
           lesson_id: string
           user_id: string
+          watch_seconds: number
         }
         Insert: {
+          completed?: boolean
           completed_at?: string
           id?: string
+          last_position_seconds?: number
           lesson_id: string
           user_id: string
+          watch_seconds?: number
         }
         Update: {
+          completed?: boolean
           completed_at?: string
           id?: string
+          last_position_seconds?: number
           lesson_id?: string
           user_id?: string
+          watch_seconds?: number
         }
         Relationships: [
           {
@@ -757,6 +1061,71 @@ export type Database = {
           student_id?: string
         }
         Relationships: []
+      }
+      mentor_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_booked: boolean
+          mentor_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_booked?: boolean
+          mentor_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_booked?: boolean
+          mentor_id?: string
+          start_time?: string
+        }
+        Relationships: []
+      }
+      mentor_bookings: {
+        Row: {
+          availability_id: string
+          cancelled_at: string | null
+          created_at: string
+          id: string
+          mentee_id: string
+          mentor_id: string
+          status: string
+        }
+        Insert: {
+          availability_id: string
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          status?: string
+        }
+        Update: {
+          availability_id?: string
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_bookings_availability_id_fkey"
+            columns: ["availability_id"]
+            isOneToOne: true
+            referencedRelation: "mentor_availability"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mentor_notes: {
         Row: {
@@ -858,10 +1227,14 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cp_rating: number
           created_at: string
+          daily_streak_count: number
+          daily_streak_last_date: string | null
           full_name: string | null
           id: string
           last_active_date: string | null
+          leaderboard_opt_out: boolean
           points: number
           streak_count: number
           updated_at: string
@@ -869,10 +1242,14 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cp_rating?: number
           created_at?: string
+          daily_streak_count?: number
+          daily_streak_last_date?: string | null
           full_name?: string | null
           id: string
           last_active_date?: string | null
+          leaderboard_opt_out?: boolean
           points?: number
           streak_count?: number
           updated_at?: string
@@ -880,15 +1257,80 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cp_rating?: number
           created_at?: string
+          daily_streak_count?: number
+          daily_streak_last_date?: string | null
           full_name?: string | null
           id?: string
           last_active_date?: string | null
+          leaderboard_opt_out?: boolean
           points?: number
           streak_count?: number
           updated_at?: string
         }
         Relationships: []
+      }
+      question_hint_reveals: {
+        Row: {
+          hint_id: string
+          revealed_at: string
+          user_id: string
+        }
+        Insert: {
+          hint_id: string
+          revealed_at?: string
+          user_id: string
+        }
+        Update: {
+          hint_id?: string
+          revealed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_hint_reveals_hint_id_fkey"
+            columns: ["hint_id"]
+            isOneToOne: false
+            referencedRelation: "question_hints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_hints: {
+        Row: {
+          created_at: string
+          hint_text: string
+          id: string
+          order_index: number
+          points_penalty: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          hint_text: string
+          id?: string
+          order_index?: number
+          points_penalty?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          hint_text?: string
+          id?: string
+          order_index?: number
+          points_penalty?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_hints_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       question_topics: {
         Row: {
@@ -940,6 +1382,8 @@ export type Database = {
           created_at: string
           description: string
           difficulty: string
+          editorial: string | null
+          editorial_video_id: string | null
           id: string
           is_archived: boolean
           language_id: string | null
@@ -960,6 +1404,8 @@ export type Database = {
           created_at?: string
           description: string
           difficulty: string
+          editorial?: string | null
+          editorial_video_id?: string | null
           id?: string
           is_archived?: boolean
           language_id?: string | null
@@ -980,6 +1426,8 @@ export type Database = {
           created_at?: string
           description?: string
           difficulty?: string
+          editorial?: string | null
+          editorial_video_id?: string | null
           id?: string
           is_archived?: boolean
           language_id?: string | null
@@ -1089,6 +1537,54 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "course_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rating_history: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          new_rating: number
+          old_rating: number
+          question_id: string | null
+          submission_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          new_rating: number
+          old_rating: number
+          question_id?: string | null
+          submission_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          new_rating?: number
+          old_rating?: number
+          question_id?: string | null
+          submission_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rating_history_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rating_history_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -1279,8 +1775,11 @@ export type Database = {
           points_awarded: number
           question_id: string | null
           runtime_ms: number | null
+          score: number | null
           status: string | null
           submitted_at: string
+          test_cases_passed: number
+          test_cases_total: number
           user_id: string
         }
         Insert: {
@@ -1291,8 +1790,11 @@ export type Database = {
           points_awarded?: number
           question_id?: string | null
           runtime_ms?: number | null
+          score?: number | null
           status?: string | null
           submitted_at?: string
+          test_cases_passed?: number
+          test_cases_total?: number
           user_id: string
         }
         Update: {
@@ -1303,8 +1805,11 @@ export type Database = {
           points_awarded?: number
           question_id?: string | null
           runtime_ms?: number | null
+          score?: number | null
           status?: string | null
           submitted_at?: string
+          test_cases_passed?: number
+          test_cases_total?: number
           user_id?: string
         }
         Relationships: [
@@ -1537,8 +2042,20 @@ export type Database = {
       }
     }
     Functions: {
+      apply_cp_rating_update: {
+        Args: { _question_id: string; _submission_id: string; _user_id: string }
+        Returns: number
+      }
       award_badge: {
         Args: { _name: string; _user_id: string }
+        Returns: undefined
+      }
+      book_mentor_slot: {
+        Args: { _availability_id: string; _mentee_id: string }
+        Returns: string
+      }
+      cancel_mentor_booking: {
+        Args: { _actor_id: string; _booking_id: string }
         Returns: undefined
       }
       create_notification: {
@@ -1559,6 +2076,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_course_unlocked: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
@@ -1569,7 +2090,15 @@ export type Database = {
         Returns: string
       }
       notify_streak_risk: { Args: never; Returns: undefined }
+      promote_next_waitlisted: {
+        Args: { _event_id: string }
+        Returns: undefined
+      }
       refresh_leaderboard: { Args: never; Returns: undefined }
+      register_for_event: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: string
+      }
       reset_broken_streaks: { Args: never; Returns: undefined }
       seed_question: {
         Args: {
@@ -1719,6 +2248,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["student", "manager", "admin"],

@@ -46,6 +46,8 @@ export const submitSolution = createServerFn({ method: "POST" })
       code: data.code,
       accepted: outcome.allPassed,
       runtimeMs: Math.round(runtimeMs),
+      testsPassed: outcome.results.filter((r) => r.passed).length,
+      testsTotal: outcome.results.length,
     });
 
     return { ...outcome, graded: true as const, ...record, questionPoints: question.points };

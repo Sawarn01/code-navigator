@@ -20,6 +20,20 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Environment variables (contains live Supabase service-role key)
+.env
+.env.*
+!.env.example
+
+# This project uses bun (see bun.lock) — don't track an npm lockfile too
+package-lock.json
+
+# Supabase CLI local link/session cache
+supabase/.temp/
+
+# Claude Code local session state
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

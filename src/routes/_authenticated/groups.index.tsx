@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { Lock, Plus, Search, Users } from "lucide-react";
+import { Lock, Plus, Search, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
-import { createGroup, joinGroup, listGroups } from "@/lib/groups.functions";
+import { createGroup, joinGroup, listGroups, getGroupsLeaderboard } from "@/lib/groups.functions";
 
 export const Route = createFileRoute("/_authenticated/groups/")({
   head: () => ({
@@ -47,6 +47,10 @@ function GroupsPage() {
     queryKey: ["study-groups"],
     queryFn: () => fetchGroups(),
   });
+  const { data: groupsLeaderboard } = useQuery({
+    queryKey: ["groups-leaderboard"],
+    queryFn: () => getGroupsLeaderboard(),
+  });
 
   const createMutation = useMutation({
     mutationFn: () => create({ data: { name, description, is_public: isPublic } }),
@@ -76,8 +80,7 @@ function GroupsPage() {
     const q = query.trim().toLowerCase();
     if (!q) return list;
     return list.filter(
-      (g) =>
-        g.name.toLowerCase().includes(q) || (g.description ?? "").toLowerCase().includes(q),
+      (g) => g.name.toLowerCase().includes(q) || (g.description ?? "").toLowerCase().includes(q),
     );
   }, [data, query]);
 
@@ -177,6 +180,32 @@ function GroupsPage() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {(groupsLeaderboard ?? []).length > 0 && (
+          <BentoCard className="mt-8">
+            <h2 className="inline-flex items-center gap-1.5 font-display text-lg font-bold text-indigo-900">
+              <Trophy className="size-4" /> Top groups
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ranked by combined member points — public groups only.
+            </p>
+            <ol className="mt-4 space-y-1.5">
+              {(groupsLeaderboard ?? []).slice(0, 10).map((g, i) => (
+                <li
+                  key={g.groupId}
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-accent/60"
+                >
+                  <span className="font-medium text-indigo-900">
+                    {i + 1}. {g.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {g.totalPoints} pts · {g.memberCount} member{g.memberCount === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </BentoCard>
         )}
 
         {isLoading ? (
