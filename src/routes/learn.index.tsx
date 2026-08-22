@@ -137,6 +137,12 @@ function LearnPage() {
                   <span className="inline-flex items-center gap-1">
                     <BookOpen className="size-3.5" /> {course.language_name}
                   </span>
+                  {ratings?.[course.id] && (
+                    <span className="inline-flex items-center gap-1 font-semibold text-indigo-700">
+                      <StarRow value={ratings[course.id].average} size={12} />
+                      {ratings[course.id].average.toFixed(1)} ({ratings[course.id].count})
+                    </span>
+                  )}
                 </div>
                 {isAuthenticated && (
                   <CourseProgressBar done={byCourse[course.id] ?? 0} total={course.lesson_count} />
