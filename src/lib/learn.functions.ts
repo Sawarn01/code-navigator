@@ -144,12 +144,43 @@ export const setLessonComplete = createServerFn({ method: "POST" })
     lessonId: String(input.lessonId),
     completed: Boolean(input.completed),
   }))
-  .handler(async ({ context, data }) => {
+  .handler(async ({ context, data }): Promise<{ ok: true; certificateCode: string | null }> => {
     if (data.completed) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: quiz } = await supabaseAdmin
+        .from("course_quizzes")
+        .select("id")
+        .eq("lesson_id", data.lessonId)
+        .maybeSingle();
+      if (quiz) {
+        const { data: passed } = await context.supabase
+          .from("quiz_attempts")
+          .select("id")
+          .eq("user_id", context.userId)
+          .eq("quiz_id", quiz.id)
+          .eq("passed", true)
+          .limit(1);
+        if (!passed?.length) throw new Error("Pass the lesson quiz before marking this lesson complete.");
+      }
+
       const { error } = await context.supabase
         .from("lesson_progress")
         .insert({ user_id: context.userId, lesson_id: data.lessonId });
       if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+
+      const { data: lesson } = await supabaseAdmin
+        .from("course_lessons")
+        .select("course_sections(course_id)")
+        .eq("id", data.lessonId)
+        .maybeSingle();
+      const courseId = (lesson?.course_sections as { course_id: string } | null)?.course_id;
+      if (courseId) {
+        const { data: code } = await supabaseAdmin.rpc("issue_certificate_if_complete", {
+          _user_id: context.userId,
+          _course_id: courseId,
+        });
+        return { ok: true, certificateCode: (code as string | null) ?? null };
+      }
     } else {
       const { error } = await context.supabase
         .from("lesson_progress")
@@ -158,7 +189,7 @@ export const setLessonComplete = createServerFn({ method: "POST" })
         .eq("lesson_id", data.lessonId);
       if (error) throw new Error(error.message);
     }
-    return { ok: true };
+    return { ok: true, certificateCode: null };
   });
 
 export const getMyCourseProgress = createServerFn({ method: "GET" })
