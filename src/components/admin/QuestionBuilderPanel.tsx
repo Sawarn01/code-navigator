@@ -206,7 +206,7 @@ export function QuestionBuilderPanel() {
           index: r.index,
           passed: r.passed,
           actual: r.actual,
-          expected: r.expected,
+          expected: r.expected ?? "",
           stderr: r.stderr,
         })),
       );
