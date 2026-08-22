@@ -280,23 +280,36 @@ function CourseDetailPage() {
                       )}
                       {isAuthenticated ? (
                         <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          disabled={mutation.isPending}
+                          whileHover={{ scale: quizLocked ? 1 : 1.03 }}
+                          whileTap={{ scale: quizLocked ? 1 : 0.97 }}
+                          disabled={mutation.isPending || (quizLocked && !completed.has(activeLesson.id))}
+                          title={
+                            quizLocked && !completed.has(activeLesson.id)
+                              ? "Pass the lesson quiz to unlock completion"
+                              : undefined
+                          }
                           onClick={() =>
                             mutation.mutate({
                               lessonId: activeLesson.id,
                               completed: !completed.has(activeLesson.id),
                             })
                           }
-                          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                             completed.has(activeLesson.id)
                               ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "bg-primary text-primary-foreground hover:bg-indigo-700"
                           }`}
                         >
-                          <CheckCircle2 className="size-4" />
-                          {completed.has(activeLesson.id) ? "Completed" : "Mark complete"}
+                          {quizLocked && !completed.has(activeLesson.id) ? (
+                            <Lock className="size-4" />
+                          ) : (
+                            <CheckCircle2 className="size-4" />
+                          )}
+                          {completed.has(activeLesson.id)
+                            ? "Completed"
+                            : quizLocked
+                              ? "Pass quiz to complete"
+                              : "Mark complete"}
                         </motion.button>
                       ) : (
                         <Link
@@ -308,6 +321,16 @@ function CourseDetailPage() {
                       )}
                     </div>
                   </div>
+
+                  {activeQuiz && (
+                    <div className="mt-6 border-t border-border pt-6">
+                      <LessonQuiz
+                        quiz={activeQuiz}
+                        passed={passedQuizIds.includes(activeQuiz.id)}
+                        languageSlug={course.language_slug}
+                      />
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
