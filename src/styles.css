@@ -213,3 +213,9 @@
 @utility surface-tint {
   background-color: var(--indigo-50);
 }
+
+@media (min-width: 1024px) {
+  body.app-shell-sidebar {
+    padding-left: 16rem;
+  }
+}
