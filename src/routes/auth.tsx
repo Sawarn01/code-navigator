@@ -42,7 +42,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/profile/$userId", params: { userId: "me" }, replace: true });
+      if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
 
@@ -78,7 +78,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) {
-          navigate({ to: "/profile/$userId", params: { userId: "me" }, replace: true });
+          navigate({ to: "/dashboard", replace: true });
         } else {
           setNotice("Account created. Check your inbox to confirm your email, then sign in.");
         }
@@ -88,7 +88,7 @@ function AuthPage() {
           password,
         });
         if (error) throw error;
-        navigate({ to: "/profile/$userId", params: { userId: "me" }, replace: true });
+        navigate({ to: "/dashboard", replace: true });
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: `${window.location.origin}/reset-password`,

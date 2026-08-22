@@ -32,3 +32,33 @@ export const getSupabaseHealth = createServerFn({ method: "GET" }).handler(
     };
   },
 );
+
+export type PistonHealth = { reachable: boolean; runtimes: number; message: string };
+
+/** Ping the self-hosted Piston execution service (admin system status card). */
+export const getPistonHealth = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PistonHealth> => {
+    const base = process.env["PISTON_URL"];
+    if (!base) return { reachable: false, runtimes: 0, message: "PISTON_URL is not configured" };
+    try {
+      const headers: Record<string, string> = {};
+      const key = process.env["PISTON_API_KEY"];
+      if (key) headers["Authorization"] = key;
+      const res = await fetch(`${base.replace(/\/$/, "")}/api/v2/runtimes`, {
+        headers,
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) {
+        return { reachable: false, runtimes: 0, message: `Piston responded ${res.status}` };
+      }
+      const runtimes = (await res.json()) as unknown[];
+      return {
+        reachable: true,
+        runtimes: Array.isArray(runtimes) ? runtimes.length : 0,
+        message: "Execution service reachable",
+      };
+    } catch (e) {
+      return { reachable: false, runtimes: 0, message: (e as Error).message };
+    }
+  },
+);

@@ -38,11 +38,63 @@ export async function fetchQuestions(category: "practice" | "cp"): Promise<Quest
     .from("questions")
     .select(LIST_COLS)
     .eq("category", category)
+    .eq("is_archived", false)
     .order("points")
     .order("title")
     .limit(1000);
   return (data ?? []) as QuestionListItem[];
 }
+
+export type TopicSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string;
+  count: number;
+};
+
+/** Topics plus the question -> topic-slug map, scoped to non-archived questions. */
+export async function fetchTopicGraph(category?: "practice" | "cp") {
+  const [{ data: topics }, { data: links }] = await Promise.all([
+    supabaseAdmin
+      .from("topics")
+      .select("id, name, slug, description, icon, order_index")
+      .order("order_index"),
+    supabaseAdmin
+      .from("question_topics")
+      .select("question_id, topic_id, questions!inner(category, is_archived)")
+      .limit(5000),
+  ]);
+
+  const visible = (links ?? []).filter((l) => {
+    const q = (l as unknown as { questions?: { category: string; is_archived: boolean } }).questions;
+    if (!q || q.is_archived) return false;
+    return category ? q.category === category : true;
+  });
+
+  const slugById = new Map((topics ?? []).map((t) => [t.id, t.slug] as const));
+  const questionTopics: Record<string, string[]> = {};
+  const counts = new Map<string, number>();
+  for (const link of visible) {
+    const slug = slugById.get(link.topic_id);
+    if (!slug) continue;
+    (questionTopics[link.question_id] ??= []).push(slug);
+    counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+
+  const summaries: TopicSummary[] = (topics ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    description: t.description,
+    icon: t.icon,
+    count: counts.get(t.slug) ?? 0,
+  }));
+
+  return { topics: summaries, questionTopics };
+}
+
 
 export async function fetchQuestionDetail(slug: string): Promise<QuestionDetail | null> {
   const { data } = await supabaseAdmin

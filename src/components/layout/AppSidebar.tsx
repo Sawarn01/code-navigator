@@ -21,6 +21,8 @@ import {
   BarChart3,
   UserCog,
   Layers,
+  LayoutDashboard,
+  Tags,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,10 +34,16 @@ type Tab = { label: string; icon: React.ComponentType<{ className?: string }>; i
 
 const baseTabs: Tab[] = [
   {
+    label: "Home",
+    icon: LayoutDashboard,
+    items: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }],
+  },
+  {
     label: "Train",
     icon: Code2,
     items: [
       { label: "Practice", to: "/practice", icon: Code2 },
+      { label: "Topics", to: "/practice/topics", icon: Tags },
       { label: "CP Zone", to: "/cp-zone", icon: Trophy },
       { label: "Learn", to: "/learn", icon: PlayCircle },
       { label: "Paths", to: "/paths", icon: Layers },
@@ -73,6 +81,7 @@ const staffTab: Tab = {
   items: [
     { label: "Mentees", to: "/mentees", icon: UserCog },
     { label: "Reporting", to: "/reporting", icon: BarChart3 },
+    { label: "Questions", to: "/admin/questions", icon: Tags },
     { label: "Admin", to: "/admin", icon: ShieldCheck },
   ],
 };

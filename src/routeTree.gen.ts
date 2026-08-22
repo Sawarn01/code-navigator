@@ -15,10 +15,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CpZoneRouteImport } from './routes/cp-zone'
 import { Route as DictionaryRouteImport } from './routes/dictionary'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
-import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -31,11 +31,15 @@ import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
 import { Route as PathsIndexRouteImport } from './routes/paths.index'
 import { Route as PathsPathIdRouteImport } from './routes/paths.$pathId'
+import { Route as PracticeIndexRouteImport } from './routes/practice.index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
+import { Route as AuthenticatedAdminQuestionsRouteImport } from './routes/_authenticated/admin_.questions'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups.$groupId'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
+import { Route as PracticeTopicsIndexRouteImport } from './routes/practice.topics.index'
+import { Route as PracticeTopicsTopicSlugRouteImport } from './routes/practice.topics.$topicSlug'
 import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const IndexRoute = IndexRouteImport.update({
@@ -67,11 +71,6 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PracticeRoute = PracticeRouteImport.update({
-  id: '/practice',
-  path: '/practice',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReferenceRoute = ReferenceRouteImport.update({
   id: '/reference',
   path: '/reference',
@@ -85,6 +84,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
@@ -148,10 +152,21 @@ const PathsPathIdRoute = PathsPathIdRouteImport.update({
   path: '/paths/$pathId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeIndexRoute = PracticeIndexRouteImport.update({
+  id: '/practice/',
+  path: '/practice/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin_/analytics',
     path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminQuestionsRoute =
+  AuthenticatedAdminQuestionsRouteImport.update({
+    id: '/admin_/questions',
+    path: '/admin/questions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedForumNewRoute = AuthenticatedForumNewRouteImport.update({
@@ -177,6 +192,16 @@ const AuthenticatedProfileUserIdRoute =
     path: '/profile/$userId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const PracticeTopicsIndexRoute = PracticeTopicsIndexRouteImport.update({
+  id: '/practice/topics/',
+  path: '/practice/topics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PracticeTopicsTopicSlugRoute = PracticeTopicsTopicSlugRouteImport.update({
+  id: '/practice/topics/$topicSlug',
+  path: '/practice/topics/$topicSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksWeeklyDigestRoute =
   ApiPublicHooksWeeklyDigestRouteImport.update({
     id: '/api/public/hooks/weekly-digest',
@@ -190,10 +215,10 @@ export interface FileRoutesByFullPath {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -206,11 +231,15 @@ export interface FileRoutesByFullPath {
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/paths/': typeof PathsIndexRoute
+  '/practice/': typeof PracticeIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/questions': typeof AuthenticatedAdminQuestionsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/practice/topics/': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesByTo {
@@ -219,10 +248,10 @@ export interface FileRoutesByTo {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -235,11 +264,15 @@ export interface FileRoutesByTo {
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
   '/paths': typeof PathsIndexRoute
+  '/practice': typeof PracticeIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/questions': typeof AuthenticatedAdminQuestionsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
+  '/practice/topics': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesById {
@@ -250,10 +283,10 @@ export interface FileRoutesById {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -266,11 +299,15 @@ export interface FileRoutesById {
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/paths/': typeof PathsIndexRoute
+  '/practice/': typeof PracticeIndexRoute
   '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin_/questions': typeof AuthenticatedAdminQuestionsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
+  '/practice/topics/$topicSlug': typeof PracticeTopicsTopicSlugRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/practice/topics/': typeof PracticeTopicsIndexRoute
   '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRouteTypes {
@@ -281,10 +318,10 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/dashboard'
     | '/mentees'
     | '/reporting'
     | '/settings'
@@ -297,11 +334,15 @@ export interface FileRouteTypes {
     | '/forum/'
     | '/learn/'
     | '/paths/'
+    | '/practice/'
     | '/admin/analytics'
+    | '/admin/questions'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/groups/'
+    | '/practice/topics/'
     | '/api/public/hooks/weekly-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -310,10 +351,10 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/dashboard'
     | '/mentees'
     | '/reporting'
     | '/settings'
@@ -326,11 +367,15 @@ export interface FileRouteTypes {
     | '/forum'
     | '/learn'
     | '/paths'
+    | '/practice'
     | '/admin/analytics'
+    | '/admin/questions'
     | '/forum/new'
     | '/groups/$groupId'
     | '/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/groups'
+    | '/practice/topics'
     | '/api/public/hooks/weekly-digest'
   id:
     | '__root__'
@@ -340,10 +385,10 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/_authenticated/dashboard'
     | '/_authenticated/mentees'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
@@ -356,11 +401,15 @@ export interface FileRouteTypes {
     | '/forum/'
     | '/learn/'
     | '/paths/'
+    | '/practice/'
     | '/_authenticated/admin_/analytics'
+    | '/_authenticated/admin_/questions'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/profile/$userId'
+    | '/practice/topics/$topicSlug'
     | '/_authenticated/groups/'
+    | '/practice/topics/'
     | '/api/public/hooks/weekly-digest'
   fileRoutesById: FileRoutesById
 }
@@ -371,7 +420,6 @@ export interface RootRouteChildren {
   CpZoneRoute: typeof CpZoneRoute
   DictionaryRoute: typeof DictionaryRoute
   LeaderboardRoute: typeof LeaderboardRoute
-  PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   CertificateCertificateCodeRoute: typeof CertificateCertificateCodeRoute
@@ -383,6 +431,9 @@ export interface RootRouteChildren {
   ForumIndexRoute: typeof ForumIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   PathsIndexRoute: typeof PathsIndexRoute
+  PracticeIndexRoute: typeof PracticeIndexRoute
+  PracticeTopicsTopicSlugRoute: typeof PracticeTopicsTopicSlugRoute
+  PracticeTopicsIndexRoute: typeof PracticeTopicsIndexRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
@@ -430,13 +481,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/practice': {
-      id: '/practice'
-      path: '/practice'
-      fullPath: '/practice'
-      preLoaderRoute: typeof PracticeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/reference': {
       id: '/reference'
       path: '/reference'
@@ -456,6 +500,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/mentees': {
@@ -542,11 +593,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathsPathIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice/': {
+      id: '/practice/'
+      path: '/practice'
+      fullPath: '/practice/'
+      preLoaderRoute: typeof PracticeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin_/analytics': {
       id: '/_authenticated/admin_/analytics'
       path: '/admin/analytics'
       fullPath: '/admin/analytics'
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin_/questions': {
+      id: '/_authenticated/admin_/questions'
+      path: '/admin/questions'
+      fullPath: '/admin/questions'
+      preLoaderRoute: typeof AuthenticatedAdminQuestionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/forum/new': {
@@ -577,6 +642,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileUserIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/practice/topics/': {
+      id: '/practice/topics/'
+      path: '/practice/topics'
+      fullPath: '/practice/topics/'
+      preLoaderRoute: typeof PracticeTopicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/practice/topics/$topicSlug': {
+      id: '/practice/topics/$topicSlug'
+      path: '/practice/topics/$topicSlug'
+      fullPath: '/practice/topics/$topicSlug'
+      preLoaderRoute: typeof PracticeTopicsTopicSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/weekly-digest': {
       id: '/api/public/hooks/weekly-digest'
       path: '/api/public/hooks/weekly-digest'
@@ -589,10 +668,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
   AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminQuestionsRoute: typeof AuthenticatedAdminQuestionsRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
   AuthenticatedProfileUserIdRoute: typeof AuthenticatedProfileUserIdRoute
@@ -601,10 +682,12 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
   AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminQuestionsRoute: AuthenticatedAdminQuestionsRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
   AuthenticatedProfileUserIdRoute: AuthenticatedProfileUserIdRoute,
@@ -621,7 +704,6 @@ const rootRouteChildren: RootRouteChildren = {
   CpZoneRoute: CpZoneRoute,
   DictionaryRoute: DictionaryRoute,
   LeaderboardRoute: LeaderboardRoute,
-  PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   CertificateCertificateCodeRoute: CertificateCertificateCodeRoute,
@@ -633,6 +715,9 @@ const rootRouteChildren: RootRouteChildren = {
   ForumIndexRoute: ForumIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   PathsIndexRoute: PathsIndexRoute,
+  PracticeIndexRoute: PracticeIndexRoute,
+  PracticeTopicsTopicSlugRoute: PracticeTopicsTopicSlugRoute,
+  PracticeTopicsIndexRoute: PracticeTopicsIndexRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport

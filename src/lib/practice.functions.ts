@@ -2,16 +2,29 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const getPracticeCatalog = createServerFn({ method: "GET" }).handler(async () => {
-  const { fetchLanguages, fetchQuestions } = await import("@/lib/practice.server");
-  const [languages, questions] = await Promise.all([fetchLanguages(), fetchQuestions("practice")]);
-  return { languages, questions };
+  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import(
+    "@/lib/practice.server"
+  );
+  const [languages, questions, graph] = await Promise.all([
+    fetchLanguages(),
+    fetchQuestions("practice"),
+    fetchTopicGraph("practice"),
+  ]);
+  return { languages, questions, topics: graph.topics, questionTopics: graph.questionTopics };
 });
 
 export const getCpCatalog = createServerFn({ method: "GET" }).handler(async () => {
-  const { fetchLanguages, fetchQuestions } = await import("@/lib/practice.server");
-  const [languages, questions] = await Promise.all([fetchLanguages(), fetchQuestions("cp")]);
-  return { languages, questions };
+  const { fetchLanguages, fetchQuestions, fetchTopicGraph } = await import(
+    "@/lib/practice.server"
+  );
+  const [languages, questions, graph] = await Promise.all([
+    fetchLanguages(),
+    fetchQuestions("cp"),
+    fetchTopicGraph("cp"),
+  ]);
+  return { languages, questions, topics: graph.topics, questionTopics: graph.questionTopics };
 });
+
 
 export const getQuestion = createServerFn({ method: "POST" })
   .inputValidator((input: { slug: string }) => ({ slug: String(input.slug) }))
