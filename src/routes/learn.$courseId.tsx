@@ -345,6 +345,10 @@ function CourseDetailPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            <div className="mt-6">
+              <CourseReviews courseId={courseId} currentUserId={user?.id ?? null} />
+            </div>
           </section>
         </div>
       </main>
