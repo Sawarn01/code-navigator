@@ -59,7 +59,7 @@ export const Route = createFileRoute("/learn/$courseId")({
 function CourseDetailPage() {
   const { courseId } = Route.useParams();
   const { data: course } = useSuspenseQuery(courseQuery(courseId));
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
 
   const fetchProgress = useServerFn(getMyLessonProgress);
