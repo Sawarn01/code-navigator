@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery }
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, PlayCircle } from "lucide-react";
+import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, Lock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { LessonQuiz } from "@/components/learn/LessonQuiz";
