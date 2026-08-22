@@ -8,6 +8,7 @@ import { BentoCard } from "@/components/BentoCard";
 import { listUsers, setUserRole } from "@/lib/admin.functions";
 import { RuntimePanel } from "@/components/admin/RuntimePanel";
 import { MentorPanel } from "@/components/admin/MentorPanel";
+import { CourseBuilderPanel } from "@/components/admin/CourseBuilderPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -132,6 +133,9 @@ function AdminPage() {
           </BentoCard>
           <BentoCard className="lg:col-span-6">
             <RuntimePanel />
+          </BentoCard>
+          <BentoCard className="lg:col-span-12">
+            <CourseBuilderPanel />
           </BentoCard>
           <BentoCard className="lg:col-span-12">
             <MentorPanel />

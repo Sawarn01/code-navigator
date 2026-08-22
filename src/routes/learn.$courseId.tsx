@@ -7,6 +7,8 @@ import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, Lock, PlayCircle } 
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { LessonQuiz } from "@/components/learn/LessonQuiz";
+import { LessonDiscussion } from "@/components/learn/LessonDiscussion";
+import { CourseReviews } from "@/components/learn/CourseReviews";
 import { getCourse, getMyLessonProgress, setLessonComplete } from "@/lib/learn.functions";
 import { getLessonQuiz, getMyQuizAttempts } from "@/lib/lms.functions";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,7 +59,7 @@ export const Route = createFileRoute("/learn/$courseId")({
 function CourseDetailPage() {
   const { courseId } = Route.useParams();
   const { data: course } = useSuspenseQuery(courseQuery(courseId));
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
 
   const fetchProgress = useServerFn(getMyLessonProgress);
@@ -333,9 +335,20 @@ function CourseDetailPage() {
                       />
                     </div>
                   )}
+
+                  <div className="mt-6 border-t border-border pt-6">
+                    <LessonDiscussion
+                      lessonId={activeLesson.id}
+                      currentUserId={user?.id ?? null}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
+
+            <div className="mt-6">
+              <CourseReviews courseId={courseId} currentUserId={user?.id ?? null} />
+            </div>
           </section>
         </div>
       </main>

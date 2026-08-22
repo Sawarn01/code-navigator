@@ -7,6 +7,8 @@ import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { getCourses, getMyCourseProgress } from "@/lib/learn.functions";
+import { getCourseRatings } from "@/lib/course-social.functions";
+import { StarRow } from "@/components/learn/CourseReviews";
 import { useAuth } from "@/hooks/useAuth";
 
 const coursesQuery = queryOptions({
@@ -61,6 +63,12 @@ function LearnPage() {
     queryKey: ["course-progress"],
     queryFn: () => fetchProgress(),
     enabled: isAuthenticated,
+  });
+
+  const fetchRatings = useServerFn(getCourseRatings);
+  const { data: ratings } = useQuery({
+    queryKey: ["course-ratings"],
+    queryFn: () => fetchRatings(),
   });
 
   const [language, setLanguage] = useState("all");
@@ -137,6 +145,16 @@ function LearnPage() {
                   <span className="inline-flex items-center gap-1">
                     <BookOpen className="size-3.5" /> {course.language_name}
                   </span>
+                  {(() => {
+                    const r = ratings?.[course.id];
+                    if (!r) return null;
+                    return (
+                      <span className="inline-flex items-center gap-1 font-semibold text-indigo-700">
+                        <StarRow value={r.average} size={12} />
+                        {r.average.toFixed(1)} ({r.count})
+                      </span>
+                    );
+                  })()}
                 </div>
                 {isAuthenticated && (
                   <CourseProgressBar done={byCourse[course.id] ?? 0} total={course.lesson_count} />

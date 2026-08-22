@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_lesson_comment_votes() FROM anon, authenticated, PUBLIC;
