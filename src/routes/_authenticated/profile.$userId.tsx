@@ -48,6 +48,12 @@ function ProfilePage() {
     queryFn: () => fetchProfile({ data: { userId } }),
   });
 
+  const fetchCertificates = useServerFn(getUserCertificates);
+  const { data: certificates } = useQuery({
+    queryKey: ["my-certificates", userId],
+    queryFn: () => fetchCertificates({ data: { userId } }),
+  });
+
   const mutation = useMutation({
     mutationFn: (values: typeof form) => saveProfile({ data: values }),
     onSuccess: () => {
