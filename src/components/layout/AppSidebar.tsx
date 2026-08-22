@@ -246,7 +246,7 @@ export function AppSidebar() {
       </motion.aside>
 
       {/* Top bar (search + notifications, and mobile menu trigger) */}
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-md lg:pl-64">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-md">
         <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
           <button
             type="button"
