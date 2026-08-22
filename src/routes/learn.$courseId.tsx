@@ -7,6 +7,8 @@ import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, Lock, PlayCircle } 
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { LessonQuiz } from "@/components/learn/LessonQuiz";
+import { LessonDiscussion } from "@/components/learn/LessonDiscussion";
+import { CourseReviews } from "@/components/learn/CourseReviews";
 import { getCourse, getMyLessonProgress, setLessonComplete } from "@/lib/learn.functions";
 import { getLessonQuiz, getMyQuizAttempts } from "@/lib/lms.functions";
 import { useAuth } from "@/hooks/useAuth";
