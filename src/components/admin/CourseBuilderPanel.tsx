@@ -45,14 +45,23 @@ export function CourseBuilderPanel() {
   const removeLesson = useServerFn(deleteLesson);
   const removeResource = useServerFn(deleteResource);
   const persistOrder = useServerFn(reorderItems);
+  const removeCourse = useServerFn(deleteCourse);
+  const fetchImpact = useServerFn(getCourseImpact);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openLessonId, setOpenLessonId] = useState<string | null>(null);
   const [meta, setMeta] = useState({ title: "", description: "", language_id: "" });
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   const { data: catalog, error } = useQuery({
     queryKey: ["builder-courses"],
     queryFn: () => fetchCourses(),
+    retry: false,
+  });
+
+  const { data: impact } = useQuery({
+    queryKey: ["builder-course-impact"],
+    queryFn: () => fetchImpact(),
     retry: false,
   });
 
@@ -65,9 +74,11 @@ export function CourseBuilderPanel() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["builder-course", selectedId] });
     queryClient.invalidateQueries({ queryKey: ["builder-courses"] });
+    queryClient.invalidateQueries({ queryKey: ["builder-course-impact"] });
     queryClient.invalidateQueries({ queryKey: ["courses"] });
     queryClient.invalidateQueries({ queryKey: ["course", selectedId] });
   };
+
 
   const run = useMutation({
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
