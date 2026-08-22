@@ -44,5 +44,5 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function TopicIcon({ name, className }: { name: string; className?: string }) {
   const Icon = ICONS[name] ?? Sparkles;
-  return <Icon className={className} />;
+  return <Icon className={className ?? ""} />;
 }
