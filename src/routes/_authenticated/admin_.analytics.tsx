@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/admin_/analytics")({
       {
         name: "description",
         content:
-          "Admin-only analytics for Space: активity, submissions, difficulty mix, language popularity and signup growth.",
+          "Admin-only analytics for Space: activity, submissions, difficulty mix, language popularity and signup growth.",
       },
       { property: "og:title", content: "Platform analytics — Space" },
       {
