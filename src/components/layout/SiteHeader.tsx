@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 
 const navItems = [
   { label: "Practice", to: "/practice" },
@@ -96,6 +97,15 @@ export function SiteHeader() {
 
         {isAuthenticated ? (
           <div className="flex items-center gap-2">
+            <NotificationBell />
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/settings"
+                className="hidden rounded-xl border border-input px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent sm:block"
+              >
+                Settings
+              </Link>
+            </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               <Link
                 to="/profile/$userId"
@@ -142,6 +152,14 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <Link
+              to="/settings"
+              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground"
+            >
+              Settings
+            </Link>
+          )}
           {isAuthenticated && (role === "admin" || role === "manager") && (
             <Link
               to="/admin"

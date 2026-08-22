@@ -20,6 +20,7 @@ import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
@@ -30,6 +31,7 @@ import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups.$groupId'
 import { Route as AuthenticatedProfileUserIdRouteImport } from './routes/_authenticated/profile.$userId'
+import { Route as ApiPublicHooksWeeklyDigestRouteImport } from './routes/api/public/hooks/weekly-digest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,6 +87,11 @@ const AuthenticatedMenteesRoute = AuthenticatedMenteesRouteImport.update({
   path: '/mentees',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -138,6 +145,12 @@ const AuthenticatedProfileUserIdRoute =
     path: '/profile/$userId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksWeeklyDigestRoute =
+  ApiPublicHooksWeeklyDigestRouteImport.update({
+    id: '/api/public/hooks/weekly-digest',
+    path: '/api/public/hooks/weekly-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -150,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -160,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -172,6 +187,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/mentees': typeof AuthenticatedMenteesRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -182,6 +198,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/profile/$userId': typeof AuthenticatedProfileUserIdRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -196,6 +213,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -206,6 +224,7 @@ export interface FileRoutesById {
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/profile/$userId': typeof AuthenticatedProfileUserIdRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/api/public/hooks/weekly-digest': typeof ApiPublicHooksWeeklyDigestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,6 +239,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -230,6 +250,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId'
     | '/profile/$userId'
     | '/groups/'
+    | '/api/public/hooks/weekly-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -242,6 +263,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/mentees'
+    | '/settings'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -252,6 +274,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId'
     | '/profile/$userId'
     | '/groups'
+    | '/api/public/hooks/weekly-digest'
   id:
     | '__root__'
     | '/'
@@ -265,6 +288,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/mentees'
+    | '/_authenticated/settings'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -275,6 +299,7 @@ export interface FileRouteTypes {
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/profile/$userId'
     | '/_authenticated/groups/'
+    | '/api/public/hooks/weekly-digest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -293,6 +318,7 @@ export interface RootRouteChildren {
   EventsIndexRoute: typeof EventsIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
+  ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -374,6 +400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMenteesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/events/': {
       id: '/events/'
       path: '/events'
@@ -444,12 +477,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileUserIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/weekly-digest': {
+      id: '/api/public/hooks/weekly-digest'
+      path: '/api/public/hooks/weekly-digest'
+      fullPath: '/api/public/hooks/weekly-digest'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedForumNewRoute: typeof AuthenticatedForumNewRoute
   AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
   AuthenticatedProfileUserIdRoute: typeof AuthenticatedProfileUserIdRoute
@@ -459,6 +500,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedForumNewRoute: AuthenticatedForumNewRoute,
   AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
   AuthenticatedProfileUserIdRoute: AuthenticatedProfileUserIdRoute,
@@ -484,6 +526,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIndexRoute: EventsIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
+  ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

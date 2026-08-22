@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { BentoCard } from "@/components/BentoCard";
 import { getProfile, updateProfile } from "@/lib/profile.functions";
+import { ActivityHeatmap } from "@/components/profile/ActivityHeatmap";
 
 export const Route = createFileRoute("/_authenticated/profile/$userId")({
   head: () => ({
@@ -58,6 +59,8 @@ function ProfilePage() {
   });
 
   const profile = data?.profile;
+  const todayUtc = new Date().toISOString().slice(0, 10);
+  const solvedToday = data?.lastActiveDate === todayUtc;
   const initials = (profile?.full_name ?? "Space Student")
     .split(" ")
     .map((p) => p[0])
@@ -181,6 +184,49 @@ function ProfilePage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 of {data?.totalUsers} students on Space
               </p>
+            </BentoCard>
+
+            <BentoCard className="lg:col-span-2" delay={0.12}>
+              <p className="text-sm font-medium text-muted-foreground">Current streak</p>
+              <div className="mt-3 flex items-baseline gap-2">
+                <motion.span
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                  className="font-display text-5xl font-extrabold text-indigo-600"
+                >
+                  {data?.streak ?? 0}
+                </motion.span>
+                <span className="text-sm font-semibold text-indigo-700">
+                  day{(data?.streak ?? 0) === 1 ? "" : "s"}
+                </span>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {solvedToday
+                  ? "Solved today — streak is safe."
+                  : "Solve one today to keep your streak."}
+              </p>
+              {!solvedToday && (
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="mt-4">
+                  <Link
+                    to="/practice"
+                    search={{ lang: "all", q: "" }}
+                    className="inline-block rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-indigo-700"
+                  >
+                    Practice now
+                  </Link>
+                </motion.div>
+              )}
+            </BentoCard>
+
+            <BentoCard className="lg:col-span-4" delay={0.16}>
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-lg">Activity</h2>
+                <span className="text-xs text-muted-foreground">Last 26 weeks</span>
+              </div>
+              <div className="mt-4">
+                <ActivityHeatmap days={data?.activity ?? []} />
+              </div>
             </BentoCard>
 
             <BentoCard className="lg:col-span-4" delay={0.14}>
