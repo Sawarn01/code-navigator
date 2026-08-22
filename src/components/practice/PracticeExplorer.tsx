@@ -55,6 +55,28 @@ export function PracticeExplorer({
   const [topic, setTopic] = useState<string>("all");
   const [search, setSearch] = useState(initialSearch ?? "");
 
+  const topicNameBySlug = useMemo(
+    () => Object.fromEntries(topics.map((t) => [t.slug, t.name.toLowerCase()])),
+    [topics],
+  );
+
+  const matchesSearch = useMemo(() => {
+    const terms = search
+      .toLowerCase()
+      .split(/[^a-z0-9+#]+/i)
+      .filter(Boolean);
+    return (q: ExplorerQuestion) => {
+      if (terms.length === 0) return true;
+      const qTopics = questionTopics[q.id] ?? [];
+      const haystack = [
+        q.title.toLowerCase(),
+        q.slug.toLowerCase(),
+        ...qTopics.map((s) => `${s} ${topicNameBySlug[s] ?? ""}`),
+      ].join(" ");
+      return terms.some((t) => haystack.includes(t));
+    };
+  }, [search, questionTopics, topicNameBySlug]);
+
   const filtered = useMemo(() => {
     const langId = languages.find((l) => l.slug === language)?.id;
     return questions.filter((q) => {
@@ -65,7 +87,7 @@ export function PracticeExplorer({
       if (difficulty !== "all" && q.difficulty !== difficulty) return false;
       if (status === "solved" && !solved.has(q.id)) return false;
       if (status === "unsolved" && solved.has(q.id)) return false;
-      if (search && !q.title.toLowerCase().includes(search.toLowerCase())) return false;
+      if (!matchesSearch(q)) return false;
       return true;
     });
   }, [
@@ -77,9 +99,10 @@ export function PracticeExplorer({
     language,
     difficulty,
     status,
-    search,
+    matchesSearch,
     solved,
   ]);
+
 
   const [selected, setSelected] = useState<string | null>(null);
   const activeSlug =
@@ -201,8 +224,22 @@ export function PracticeExplorer({
             </motion.li>
           ))}
           {filtered.length === 0 && (
-            <li className="py-8 text-center text-sm text-muted-foreground">No problems match.</li>
+            <li className="space-y-2 py-8 text-center text-sm text-muted-foreground">
+              <p>No problems match{search ? ` “${search}”` : ""}.</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setDifficulty("all");
+                  setStatus("all");
+                  if (!lockedTopic) setTopic("all");
+                }}
+                className="rounded-xl surface-tint px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+              >
+                Clear filters
+              </button>
+            </li>
           )}
+
         </ul>
       </aside>
 
