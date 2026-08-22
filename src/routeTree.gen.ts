@@ -29,6 +29,7 @@ import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
+import { Route as PathsIndexRouteImport } from './routes/paths.index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
@@ -136,6 +137,11 @@ const LearnCourseIdRoute = LearnCourseIdRouteImport.update({
   path: '/learn/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PathsIndexRoute = PathsIndexRouteImport.update({
+  id: '/paths/',
+  path: '/paths/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin_/analytics',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/paths/': typeof PathsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
+  '/paths': typeof PathsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/paths/': typeof PathsIndexRoute
   '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/paths/'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/forum'
     | '/learn'
+    | '/paths'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/forum/'
     | '/learn/'
+    | '/paths/'
     | '/_authenticated/admin_/analytics'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
@@ -357,6 +369,7 @@ export interface RootRouteChildren {
   EventsIndexRoute: typeof EventsIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
+  PathsIndexRoute: typeof PathsIndexRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paths/': {
+      id: '/paths/'
+      path: '/paths'
+      fullPath: '/paths/'
+      preLoaderRoute: typeof PathsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin_/analytics': {
       id: '/_authenticated/admin_/analytics'
       path: '/admin/analytics'
@@ -591,6 +611,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIndexRoute: EventsIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
+  PathsIndexRoute: PathsIndexRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport
