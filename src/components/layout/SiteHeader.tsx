@@ -69,14 +69,24 @@ export function SiteHeader() {
             </motion.div>
           ))}
           {isAuthenticated && (role === "admin" || role === "manager") && (
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
-              <Link
-                to="/admin"
-                className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
-              >
-                Admin
-              </Link>
-            </motion.div>
+            <>
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
+                <Link
+                  to="/mentees"
+                  className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
+                >
+                  Mentees
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>
+                <Link
+                  to="/admin"
+                  className="rounded-lg px-2.5 py-2 text-[13px] font-semibold text-indigo-700 transition-colors hover:bg-accent"
+                >
+                  Admin
+                </Link>
+              </motion.div>
+            </>
           )}
         </nav>
 
