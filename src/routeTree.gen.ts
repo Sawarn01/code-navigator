@@ -22,6 +22,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as CertificateCertificateCodeRouteImport } from './routes/certificate.$certificateCode'
 import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
@@ -99,6 +100,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CertificateCertificateCodeRoute =
+  CertificateCertificateCodeRouteImport.update({
+    id: '/certificate/$certificateCode',
+    path: '/certificate/$certificateCode',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -204,6 +212,7 @@ export interface FileRoutesByTo {
   '/mentees': typeof AuthenticatedMenteesRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/learn/$courseId': typeof LearnCourseIdRoute
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/mentees'
     | '/reporting'
     | '/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/mentees'
     | '/reporting'
     | '/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mentees'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
+    | '/certificate/$certificateCode'
     | '/events/$eventId'
     | '/forum/$postId'
     | '/learn/$courseId'
@@ -337,6 +350,7 @@ export interface RootRouteChildren {
   PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  CertificateCertificateCodeRoute: typeof CertificateCertificateCodeRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   ForumPostIdRoute: typeof ForumPostIdRoute
   LearnCourseIdRoute: typeof LearnCourseIdRoute
@@ -438,6 +452,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/certificate/$certificateCode': {
+      id: '/certificate/$certificateCode'
+      path: '/certificate/$certificateCode'
+      fullPath: '/certificate/$certificateCode'
+      preLoaderRoute: typeof CertificateCertificateCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/events/': {
       id: '/events/'
@@ -563,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  CertificateCertificateCodeRoute: CertificateCertificateCodeRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   ForumPostIdRoute: ForumPostIdRoute,
   LearnCourseIdRoute: LearnCourseIdRoute,
