@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import {
+  AlertTriangle,
   ChevronDown,
   FileText,
   GripVertical,
@@ -13,10 +14,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
+  deleteCourse,
   deleteLesson,
   deleteResource,
   deleteSection,
   getBuilderCourse,
+  getCourseImpact,
   listBuilderCourses,
   reorderItems,
   saveCourse,
@@ -26,6 +29,7 @@ import {
   type BuilderLesson,
   type BuilderSection,
 } from "@/lib/course-builder.functions";
+
 
 const RESOURCE_TYPES = ["pdf", "slides", "link", "code"] as const;
 
