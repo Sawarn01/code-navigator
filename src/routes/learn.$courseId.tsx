@@ -6,7 +6,9 @@ import { useMemo, useState } from "react";
 import { CheckCircle2, ChevronDown, Circle, Clock, Dumbbell, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { LessonQuiz } from "@/components/learn/LessonQuiz";
 import { getCourse, getMyLessonProgress, setLessonComplete } from "@/lib/learn.functions";
+import { getLessonQuiz, getMyQuizAttempts } from "@/lib/lms.functions";
 import { useAuth } from "@/hooks/useAuth";
 
 const courseQuery = (courseId: string) =>
