@@ -15,7 +15,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CpZoneRouteImport } from './routes/cp-zone'
 import { Route as DictionaryRouteImport } from './routes/dictionary'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
-import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -31,6 +30,7 @@ import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnCourseIdRouteImport } from './routes/learn.$courseId'
 import { Route as PathsIndexRouteImport } from './routes/paths.index'
 import { Route as PathsPathIdRouteImport } from './routes/paths.$pathId'
+import { Route as PracticeIndexRouteImport } from './routes/practice.index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin_.analytics'
 import { Route as AuthenticatedForumNewRouteImport } from './routes/_authenticated/forum.new'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
@@ -65,11 +65,6 @@ const DictionaryRoute = DictionaryRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PracticeRoute = PracticeRouteImport.update({
-  id: '/practice',
-  path: '/practice',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReferenceRoute = ReferenceRouteImport.update({
@@ -148,6 +143,11 @@ const PathsPathIdRoute = PathsPathIdRouteImport.update({
   path: '/paths/$pathId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeIndexRoute = PracticeIndexRouteImport.update({
+  id: '/practice/',
+  path: '/practice/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin_/analytics',
@@ -190,7 +190,6 @@ export interface FileRoutesByFullPath {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -206,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/paths/': typeof PathsIndexRoute
+  '/practice/': typeof PracticeIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -219,7 +219,6 @@ export interface FileRoutesByTo {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -235,6 +234,7 @@ export interface FileRoutesByTo {
   '/forum': typeof ForumIndexRoute
   '/learn': typeof LearnIndexRoute
   '/paths': typeof PathsIndexRoute
+  '/practice': typeof PracticeIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/forum/new': typeof AuthenticatedForumNewRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -250,7 +250,6 @@ export interface FileRoutesById {
   '/cp-zone': typeof CpZoneRoute
   '/dictionary': typeof DictionaryRoute
   '/leaderboard': typeof LeaderboardRoute
-  '/practice': typeof PracticeRoute
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -266,6 +265,7 @@ export interface FileRoutesById {
   '/forum/': typeof ForumIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/paths/': typeof PathsIndexRoute
+  '/practice/': typeof PracticeIndexRoute
   '/_authenticated/admin_/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/forum/new': typeof AuthenticatedForumNewRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
@@ -281,7 +281,6 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
@@ -297,6 +296,7 @@ export interface FileRouteTypes {
     | '/forum/'
     | '/learn/'
     | '/paths/'
+    | '/practice/'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -310,7 +310,6 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/admin'
@@ -326,6 +325,7 @@ export interface FileRouteTypes {
     | '/forum'
     | '/learn'
     | '/paths'
+    | '/practice'
     | '/admin/analytics'
     | '/forum/new'
     | '/groups/$groupId'
@@ -340,7 +340,6 @@ export interface FileRouteTypes {
     | '/cp-zone'
     | '/dictionary'
     | '/leaderboard'
-    | '/practice'
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
@@ -356,6 +355,7 @@ export interface FileRouteTypes {
     | '/forum/'
     | '/learn/'
     | '/paths/'
+    | '/practice/'
     | '/_authenticated/admin_/analytics'
     | '/_authenticated/forum/new'
     | '/_authenticated/groups/$groupId'
@@ -371,7 +371,6 @@ export interface RootRouteChildren {
   CpZoneRoute: typeof CpZoneRoute
   DictionaryRoute: typeof DictionaryRoute
   LeaderboardRoute: typeof LeaderboardRoute
-  PracticeRoute: typeof PracticeRoute
   ReferenceRoute: typeof ReferenceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   CertificateCertificateCodeRoute: typeof CertificateCertificateCodeRoute
@@ -383,6 +382,7 @@ export interface RootRouteChildren {
   ForumIndexRoute: typeof ForumIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   PathsIndexRoute: typeof PathsIndexRoute
+  PracticeIndexRoute: typeof PracticeIndexRoute
   ApiPublicHooksWeeklyDigestRoute: typeof ApiPublicHooksWeeklyDigestRoute
 }
 
@@ -428,13 +428,6 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/practice': {
-      id: '/practice'
-      path: '/practice'
-      fullPath: '/practice'
-      preLoaderRoute: typeof PracticeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reference': {
@@ -542,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathsPathIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice/': {
+      id: '/practice/'
+      path: '/practice'
+      fullPath: '/practice/'
+      preLoaderRoute: typeof PracticeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin_/analytics': {
       id: '/_authenticated/admin_/analytics'
       path: '/admin/analytics'
@@ -621,7 +621,6 @@ const rootRouteChildren: RootRouteChildren = {
   CpZoneRoute: CpZoneRoute,
   DictionaryRoute: DictionaryRoute,
   LeaderboardRoute: LeaderboardRoute,
-  PracticeRoute: PracticeRoute,
   ReferenceRoute: ReferenceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   CertificateCertificateCodeRoute: CertificateCertificateCodeRoute,
@@ -633,6 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForumIndexRoute: ForumIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   PathsIndexRoute: PathsIndexRoute,
+  PracticeIndexRoute: PracticeIndexRoute,
   ApiPublicHooksWeeklyDigestRoute: ApiPublicHooksWeeklyDigestRoute,
 }
 export const routeTree = rootRouteImport
