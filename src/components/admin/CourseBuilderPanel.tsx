@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
@@ -60,6 +61,9 @@ export function CourseBuilderPanel() {
     language_id: "",
     thumbnail_url: "",
   });
+  // Portals need a real document, so only render them post-mount (client-side).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const { data: catalog, error } = useQuery({
     queryKey: ["builder-courses"],
@@ -171,115 +175,123 @@ export function CourseBuilderPanel() {
         </motion.button>
       </div>
 
-      <AnimatePresence>
-        {showCreateForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-indigo-950/40 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 10 }}
-              animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-lg rounded-2xl border border-border bg-card p-6"
-            >
-              <h3 className="font-display text-lg font-semibold text-indigo-900">New course</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Set the basics now — sections, lessons and prerequisites are added afterward.
-              </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-indigo-900 sm:col-span-2">
-                  Title
-                  <input
-                    autoFocus
-                    value={createForm.title}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
-                    placeholder="e.g. Modern JavaScript"
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
-                  />
-                </label>
-                <label className="text-xs font-semibold text-indigo-900 sm:col-span-2">
-                  Description
-                  <textarea
-                    value={createForm.description}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
-                    rows={3}
-                    placeholder="What will students learn?"
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
-                  />
-                </label>
-                <label className="text-xs font-semibold text-indigo-900">
-                  Language
-                  <select
-                    value={createForm.language_id}
-                    onChange={(e) => setCreateForm((f) => ({ ...f, language_id: e.target.value }))}
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
-                  >
-                    <option value="">General</option>
-                    {(catalog?.languages ?? []).map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-xs font-semibold text-indigo-900">
-                  Thumbnail URL
-                  <input
-                    value={createForm.thumbnail_url}
-                    onChange={(e) =>
-                      setCreateForm((f) => ({ ...f, thumbnail_url: e.target.value }))
-                    }
-                    placeholder="https://…"
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
-                  />
-                </label>
-              </div>
-              <div className="mt-5 flex justify-end gap-2">
-                <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showCreateForm && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 grid place-items-center bg-indigo-950/40 p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, y: 10 }}
+                  animate={{ scale: 1, y: 0 }}
+                  className="w-full max-w-lg rounded-2xl border border-border bg-card p-6"
                 >
-                  Cancel
-                </button>
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    const title = createForm.title.trim();
-                    if (!title) {
-                      toast.error("Title is required");
-                      return;
-                    }
-                    run.mutate(async () => {
-                      const created = await persistCourse({
-                        data: {
-                          title,
-                          description: createForm.description.trim() || null,
-                          language_id: createForm.language_id || null,
-                          thumbnail_url: createForm.thumbnail_url.trim() || null,
-                        },
-                      });
-                      setSelectedId(created.id);
-                      setMeta({
-                        title,
-                        description: createForm.description.trim(),
-                        language_id: createForm.language_id,
-                      });
-                      setShowCreateForm(false);
-                      toast.success("Course created");
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-indigo-700"
-                >
-                  <Plus className="size-4" /> Create course
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <h3 className="font-display text-lg font-semibold text-indigo-900">New course</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Set the basics now — sections, lessons and prerequisites are added afterward.
+                  </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="text-xs font-semibold text-indigo-900 sm:col-span-2">
+                      Title
+                      <input
+                        autoFocus
+                        value={createForm.title}
+                        onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
+                        placeholder="e.g. Modern JavaScript"
+                        className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold text-indigo-900 sm:col-span-2">
+                      Description
+                      <textarea
+                        value={createForm.description}
+                        onChange={(e) =>
+                          setCreateForm((f) => ({ ...f, description: e.target.value }))
+                        }
+                        rows={3}
+                        placeholder="What will students learn?"
+                        className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold text-indigo-900">
+                      Language
+                      <select
+                        value={createForm.language_id}
+                        onChange={(e) =>
+                          setCreateForm((f) => ({ ...f, language_id: e.target.value }))
+                        }
+                        className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
+                      >
+                        <option value="">General</option>
+                        {(catalog?.languages ?? []).map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold text-indigo-900">
+                      Thumbnail URL
+                      <input
+                        value={createForm.thumbnail_url}
+                        onChange={(e) =>
+                          setCreateForm((f) => ({ ...f, thumbnail_url: e.target.value }))
+                        }
+                        placeholder="https://…"
+                        className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm font-normal"
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-5 flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowCreateForm(false)}
+                      className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => {
+                        const title = createForm.title.trim();
+                        if (!title) {
+                          toast.error("Title is required");
+                          return;
+                        }
+                        run.mutate(async () => {
+                          const created = await persistCourse({
+                            data: {
+                              title,
+                              description: createForm.description.trim() || null,
+                              language_id: createForm.language_id || null,
+                              thumbnail_url: createForm.thumbnail_url.trim() || null,
+                            },
+                          });
+                          setSelectedId(created.id);
+                          setMeta({
+                            title,
+                            description: createForm.description.trim(),
+                            language_id: createForm.language_id,
+                          });
+                          setShowCreateForm(false);
+                          toast.success("Course created");
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-indigo-700"
+                    >
+                      <Plus className="size-4" /> Create course
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-border">
         <table className="w-full text-left text-sm">
@@ -338,61 +350,66 @@ export function CourseBuilderPanel() {
         </table>
       </div>
 
-      <AnimatePresence>
-        {deleteTarget && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-indigo-950/40 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 10 }}
-              animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-md rounded-2xl border border-border bg-card p-6"
-            >
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 size-5 text-amber-500" />
-                <div>
-                  <h3 className="font-display text-lg font-semibold text-indigo-900">
-                    Delete “{deleteTarget.title}”?
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    This permanently removes the course along with{" "}
-                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.lessons ?? 0}{" "}
-                    lesson(s), all of its sections, quizzes, lesson resources and discussions, plus
-                    the saved progress of{" "}
-                    {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.learners ?? 0}{" "}
-                    enrolled learner(s) and any certificates issued for it. This cannot be undone.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-5 flex justify-end gap-2">
-                <button
-                  onClick={() => setDeleteTarget(null)}
-                  className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {deleteTarget && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 grid place-items-center bg-indigo-950/40 p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, y: 10 }}
+                  animate={{ scale: 1, y: 0 }}
+                  className="w-full max-w-md rounded-2xl border border-border bg-card p-6"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    const id = deleteTarget.id;
-                    setDeleteTarget(null);
-                    run.mutate(async () => {
-                      await removeCourse({ data: { courseId: id } });
-                      if (selectedId === id) setSelectedId(null);
-                      toast.success("Course deleted");
-                    });
-                  }}
-                  className="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white"
-                >
-                  Delete course
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 size-5 text-amber-500" />
+                    <div>
+                      <h3 className="font-display text-lg font-semibold text-indigo-900">
+                        Delete “{deleteTarget.title}”?
+                      </h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        This permanently removes the course along with{" "}
+                        {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.lessons ?? 0}{" "}
+                        lesson(s), all of its sections, quizzes, lesson resources and discussions,
+                        plus the saved progress of{" "}
+                        {impact?.stats.find((s) => s.course_id === deleteTarget.id)?.learners ?? 0}{" "}
+                        enrolled learner(s) and any certificates issued for it. This cannot be
+                        undone.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex justify-end gap-2">
+                    <button
+                      onClick={() => setDeleteTarget(null)}
+                      className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        const id = deleteTarget.id;
+                        setDeleteTarget(null);
+                        run.mutate(async () => {
+                          await removeCourse({ data: { courseId: id } });
+                          if (selectedId === id) setSelectedId(null);
+                          toast.success("Course deleted");
+                        });
+                      }}
+                      className="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white"
+                    >
+                      Delete course
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
 
       {course && (
         <div className="mt-6 space-y-5">
