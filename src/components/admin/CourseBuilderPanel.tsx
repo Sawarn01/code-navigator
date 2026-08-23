@@ -64,6 +64,11 @@ export function CourseBuilderPanel() {
   // Portals need a real document, so only render them post-mount (client-side).
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const [addingSection, setAddingSection] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [addingLessonFor, setAddingLessonFor] = useState<string | null>(null);
+  const [newLessonTitle, setNewLessonTitle] = useState("");
+  const [newLessonDuration, setNewLessonDuration] = useState("10");
 
   const { data: catalog, error } = useQuery({
     queryKey: ["builder-courses"],
@@ -750,45 +755,125 @@ export function CourseBuilderPanel() {
                   ))}
                 </Reorder.Group>
 
-                <button
-                  onClick={() => {
-                    const title = window.prompt("New lesson title");
-                    if (!title) return;
-                    run.mutate(async () => {
-                      await persistLesson({
-                        data: {
-                          sectionId: section.id,
-                          title,
-                          duration_minutes: 10,
-                          order_index: section.lessons.length,
-                        },
-                      });
-                      toast.success("Lesson added");
-                    });
-                  }}
-                  className="mt-3 ml-6 inline-flex items-center gap-1.5 rounded-xl surface-tint px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
-                >
-                  <Plus className="size-3.5" /> Add lesson
-                </button>
+                {addingLessonFor === section.id ? (
+                  <div className="mt-3 ml-6 flex flex-wrap items-center gap-2">
+                    <input
+                      autoFocus
+                      value={newLessonTitle}
+                      onChange={(e) => setNewLessonTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setAddingLessonFor(null);
+                      }}
+                      placeholder="Lesson title"
+                      className="min-w-40 flex-1 rounded-lg border border-input bg-background px-2 py-1.5 text-xs"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      value={newLessonDuration}
+                      onChange={(e) => setNewLessonDuration(e.target.value)}
+                      placeholder="Minutes"
+                      className="w-24 rounded-lg border border-input bg-background px-2 py-1.5 text-xs"
+                    />
+                    <button
+                      onClick={() => {
+                        const title = newLessonTitle.trim();
+                        if (!title) {
+                          toast.error("Title is required");
+                          return;
+                        }
+                        run.mutate(async () => {
+                          await persistLesson({
+                            data: {
+                              sectionId: section.id,
+                              title,
+                              duration_minutes: Number(newLessonDuration) || 0,
+                              order_index: section.lessons.length,
+                            },
+                          });
+                          toast.success("Lesson added");
+                        });
+                        setAddingLessonFor(null);
+                        setNewLessonTitle("");
+                        setNewLessonDuration("10");
+                      }}
+                      className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-indigo-700"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setAddingLessonFor(null)}
+                      className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setAddingLessonFor(section.id);
+                      setNewLessonTitle("");
+                      setNewLessonDuration("10");
+                    }}
+                    className="mt-3 ml-6 inline-flex items-center gap-1.5 rounded-xl surface-tint px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                  >
+                    <Plus className="size-3.5" /> Add lesson
+                  </button>
+                )}
               </Reorder.Item>
             ))}
           </Reorder.Group>
 
-          <button
-            onClick={() => {
-              const title = window.prompt("New section title");
-              if (!title) return;
-              run.mutate(async () => {
-                await persistSection({
-                  data: { courseId: course.id, title, order_index: sections.length },
-                });
-                toast.success("Section added");
-              });
-            }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-indigo-700"
-          >
-            <Plus className="size-4" /> Add section
-          </button>
+          {addingSection ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                autoFocus
+                value={newSectionTitle}
+                onChange={(e) => setNewSectionTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setAddingSection(false);
+                }}
+                placeholder="Section title"
+                className="min-w-48 flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm"
+              />
+              <button
+                onClick={() => {
+                  const title = newSectionTitle.trim();
+                  if (!title) {
+                    toast.error("Title is required");
+                    return;
+                  }
+                  run.mutate(async () => {
+                    await persistSection({
+                      data: { courseId: course.id, title, order_index: sections.length },
+                    });
+                    toast.success("Section added");
+                  });
+                  setAddingSection(false);
+                  setNewSectionTitle("");
+                }}
+                className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-indigo-700"
+              >
+                Add
+              </button>
+              <button
+                onClick={() => setAddingSection(false)}
+                className="rounded-xl border border-border px-3 py-2 text-sm font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setAddingSection(true);
+                setNewSectionTitle("");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-indigo-700"
+            >
+              <Plus className="size-4" /> Add section
+            </button>
+          )}
         </div>
       )}
     </div>
