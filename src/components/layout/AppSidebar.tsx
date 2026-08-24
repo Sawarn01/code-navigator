@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 type SubTab = { label: string; to: string; icon: React.ComponentType<{ className?: string }> };
 type Tab = { label: string; icon: React.ComponentType<{ className?: string }>; items: SubTab[] };
@@ -278,6 +279,7 @@ export function AppSidebar() {
             <div className="hidden md:block">
               <GlobalSearch />
             </div>
+            <ThemeToggle />
             <NotificationBell />
           </div>
         </div>

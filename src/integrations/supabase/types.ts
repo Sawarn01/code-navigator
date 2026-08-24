@@ -1237,6 +1237,7 @@ export type Database = {
           leaderboard_opt_out: boolean
           points: number
           streak_count: number
+          theme_preference: string
           updated_at: string
         }
         Insert: {
@@ -1252,6 +1253,7 @@ export type Database = {
           leaderboard_opt_out?: boolean
           points?: number
           streak_count?: number
+          theme_preference?: string
           updated_at?: string
         }
         Update: {
@@ -1267,6 +1269,7 @@ export type Database = {
           leaderboard_opt_out?: boolean
           points?: number
           streak_count?: number
+          theme_preference?: string
           updated_at?: string
         }
         Relationships: []

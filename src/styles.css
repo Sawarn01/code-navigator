@@ -151,6 +151,24 @@
   --sidebar: oklch(0.24 0.035 278);
   --sidebar-foreground: oklch(0.97 0.006 275);
   --sidebar-border: oklch(1 0 0 / 12%);
+
+  /*
+   * Components hardcode indigo-50/100/700/800/900 as ad hoc semantic colors
+   * (tinted chip backgrounds, heading/accent text) rather than through the
+   * background/foreground tokens above. On a dark page those literal light
+   * mode values invert badly — indigo-900 headings (a dark ink color) go
+   * near-invisible on a dark background, and indigo-50/100 tint surfaces
+   * render as glaring light patches. Re-pointing just these five shades
+   * fixes every one of those call sites at once, everywhere in the app,
+   * without touching component code. 200-600 are left as-is: they're used
+   * for borders/icons/primary-adjacent accents that already read fine at
+   * their original mid lightness against a dark background.
+   */
+  --indigo-50: oklch(0.28 0.06 278);
+  --indigo-100: oklch(0.33 0.07 277.5);
+  --indigo-700: oklch(0.8 0.1 275);
+  --indigo-800: oklch(0.85 0.06 275);
+  --indigo-900: oklch(0.94 0.02 274);
 }
 
 @layer base {

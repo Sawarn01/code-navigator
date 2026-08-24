@@ -14,6 +14,7 @@ import {
   type NotificationPrefs,
 } from "@/lib/notifications.functions";
 import { getLeaderboardVisibility, setLeaderboardVisibility } from "@/lib/profile.functions";
+import { useTheme } from "@/hooks/useTheme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -78,9 +79,16 @@ function Switch({
   );
 }
 
+const THEME_OPTIONS = [
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
+] as const;
+
 function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
   const fetchPrefs = useServerFn(getNotificationPrefs);
   const savePrefs = useServerFn(updateNotificationPrefs);
   const removeAccount = useServerFn(deleteMyAccount);
@@ -176,7 +184,30 @@ function SettingsPage() {
         </motion.div>
 
         <div className="bento-grid mt-8">
-          <BentoCard className="lg:col-span-7">
+          <BentoCard className="lg:col-span-6">
+            <h2 className="font-display text-lg font-bold text-indigo-900">Appearance</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Switch between light and dark, or follow your device's setting.
+            </p>
+            <div className="mt-5 inline-flex rounded-xl border border-input p-1">
+              {THEME_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setTheme(opt.value)}
+                  className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                    theme === opt.value
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </BentoCard>
+
+          <BentoCard className="lg:col-span-6" delay={0.02}>
             <h2 className="font-display text-lg font-bold text-indigo-900">
               Notification preferences
             </h2>

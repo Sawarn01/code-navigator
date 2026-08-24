@@ -10,6 +10,12 @@ import {
 import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { ThemeProvider } from "@/hooks/useTheme";
+
+// Runs before first paint so the page never flashes the wrong theme: reads
+// the same localStorage key useTheme() reads, falling back to the OS
+// preference for a first-ever visit.
+const themeInitScript = `(function(){try{var s=localStorage.getItem('space-theme');var d=s==='dark'||(s!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function NotFoundComponent() {
   return (
@@ -116,6 +122,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
       <body>
@@ -131,8 +138,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ThemeProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

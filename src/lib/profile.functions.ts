@@ -206,6 +206,34 @@ export const setLeaderboardVisibility = createServerFn({ method: "POST" })
     return { ok: true, optedOut: data.optedOut };
   });
 
+export type ThemePreference = "light" | "dark" | "system";
+
+export const getThemePreference = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ theme: ThemePreference }> => {
+    const { data } = await context.supabase
+      .from("profiles")
+      .select("theme_preference")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const theme = data?.theme_preference;
+    return { theme: theme === "light" || theme === "dark" ? theme : "system" };
+  });
+
+export const setThemePreference = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { theme: ThemePreference }) => ({
+    theme: (["light", "dark", "system"] as const).includes(input.theme) ? input.theme : "system",
+  }))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ theme_preference: data.theme })
+      .eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true, theme: data.theme };
+  });
+
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { full_name: string; bio: string; avatar_url: string }) => ({
