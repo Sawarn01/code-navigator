@@ -9,6 +9,7 @@ import { listUsers, setUserRole } from "@/lib/admin.functions";
 import { RuntimePanel } from "@/components/admin/RuntimePanel";
 import { MentorPanel } from "@/components/admin/MentorPanel";
 import { CourseBuilderPanel } from "@/components/admin/CourseBuilderPanel";
+import { ClubsPanel } from "@/components/admin/ClubsPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -81,9 +82,7 @@ function AdminPage() {
         <div className="bento-grid mt-8">
           <BentoCard className="lg:col-span-6">
             {forbidden ? (
-              <p className="text-sm text-destructive">
-                You need the admin role to manage members.
-              </p>
+              <p className="text-sm text-destructive">You need the admin role to manage members.</p>
             ) : isLoading ? (
               <p className="text-sm text-muted-foreground">Loading members…</p>
             ) : (
@@ -139,6 +138,9 @@ function AdminPage() {
           </BentoCard>
           <BentoCard className="lg:col-span-12">
             <MentorPanel />
+          </BentoCard>
+          <BentoCard className="lg:col-span-12">
+            <ClubsPanel />
           </BentoCard>
         </div>
       </main>

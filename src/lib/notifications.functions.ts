@@ -48,6 +48,32 @@ export const listNotifications = createServerFn({ method: "POST" })
     return { items, unread: items.filter((n) => !n.is_read).length };
   });
 
+const PAGE_SIZE = 30;
+
+/** Full paginated history for the dedicated /notifications page (the bell only ever shows the latest 20). */
+export const listNotificationsPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input?: { cursor?: string | null }) => ({
+    cursor: input?.cursor ? String(input.cursor) : null,
+  }))
+  .handler(
+    async ({ context, data }): Promise<{ items: AppNotification[]; nextCursor: string | null }> => {
+      let query = context.supabase
+        .from("notifications")
+        .select("id, type, title, body, link, is_read, created_at")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(PAGE_SIZE);
+      if (data.cursor) query = query.lt("created_at", data.cursor);
+      const { data: rows, error } = await query;
+      if (error) throw new Error(error.message);
+      const items = (rows ?? []) as AppNotification[];
+      const nextCursor =
+        items.length === PAGE_SIZE ? (items[items.length - 1]?.created_at ?? null) : null;
+      return { items, nextCursor };
+    },
+  );
+
 export const markNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { ids?: string[] }) => ({
@@ -74,9 +100,7 @@ export const getNotificationPrefs = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!data) {
-      await context.supabase
-        .from("notification_preferences")
-        .insert({ user_id: context.userId });
+      await context.supabase.from("notification_preferences").insert({ user_id: context.userId });
       return DEFAULT_PREFS;
     }
     const row = data as unknown as Record<string, boolean>;
@@ -109,7 +133,7 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { confirm: string }) => ({ confirm: String(input?.confirm ?? "") }))
   .handler(async ({ data, context }) => {
-    if (data.confirm !== "DELETE") throw new Error('Type DELETE to confirm');
+    if (data.confirm !== "DELETE") throw new Error("Type DELETE to confirm");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.deleteUser(context.userId);
     if (error) throw new Error(error.message);

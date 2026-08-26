@@ -13,11 +13,13 @@ import {
   PlayCircle,
   MessagesSquare,
   Users,
+  Users2,
   GraduationCap,
   ChevronDown,
   Menu,
   X,
   Settings as SettingsIcon,
+  Bell,
   LogOut,
   ShieldCheck,
   BarChart3,
@@ -37,7 +39,7 @@ type Tab = { label: string; icon: React.ComponentType<{ className?: string }>; i
 
 const baseTabs: Tab[] = [
   {
-    label: "Home",
+    label: "Dashboard",
     icon: LayoutDashboard,
     items: [{ label: "Dashboard", to: "/dashboard", icon: LayoutDashboard }],
   },
@@ -75,6 +77,7 @@ const baseTabs: Tab[] = [
     items: [
       { label: "Forum", to: "/forum", icon: MessagesSquare },
       { label: "Groups", to: "/groups", icon: Users },
+      { label: "Clubs", to: "/clubs", icon: Users2 },
       { label: "Mentorship", to: "/mentorship", icon: GraduationCap },
     ],
   },
@@ -144,6 +147,24 @@ export function AppSidebar() {
   const nav = (
     <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
       {tabs.map((tab) => {
+        if (tab.items.length === 1) {
+          const item = tab.items[0]!;
+          return (
+            <Link
+              key={tab.label}
+              to={item.to}
+              className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+                activeTab === tab.label
+                  ? "text-indigo-700 surface-tint"
+                  : "text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              <tab.icon className="size-4" />
+              {tab.label}
+            </Link>
+          );
+        }
+
         const isOpen = open.includes(tab.label);
         return (
           <div key={tab.label}>
@@ -231,6 +252,12 @@ export function AppSidebar() {
             {initials || "SP"}
           </span>
           Profile
+        </Link>
+        <Link
+          to="/notifications"
+          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
+        >
+          <Bell className="size-4" /> Notifications
         </Link>
         <Link
           to="/settings"

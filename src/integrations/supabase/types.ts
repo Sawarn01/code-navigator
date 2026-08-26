@@ -140,6 +140,74 @@ export type Database = {
           },
         ]
       }
+      club_members: {
+        Row: {
+          club_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          category: string | null
+          contact_email: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          meeting_info: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          meeting_info?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          contact_email?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          meeting_info?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           course_id: string

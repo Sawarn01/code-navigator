@@ -2,34 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
-import { Bell, Award, MessageSquare, CalendarClock, Flame, NotebookPen, Users } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  listNotifications,
-  markNotificationsRead,
-  type NotificationType,
-} from "@/lib/notifications.functions";
-
-const typeIcon: Record<NotificationType, typeof Bell> = {
-  badge_earned: Award,
-  forum_reply: MessageSquare,
-  event_reminder: CalendarClock,
-  streak_risk: Flame,
-  mentor_note: NotebookPen,
-  group_invite: Users,
-};
-
-function relativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.round(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
+import { listNotifications, markNotificationsRead } from "@/lib/notifications.functions";
+import { notificationTypeIcon, relativeTime } from "@/lib/notification-display";
 
 export function NotificationBell() {
   const { isAuthenticated, user } = useAuth();
@@ -139,13 +117,22 @@ export function NotificationBell() {
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold text-indigo-900">Notifications</p>
-              <Link
-                to="/settings"
-                onClick={() => setOpen(false)}
-                className="text-xs font-semibold text-indigo-700 hover:underline"
-              >
-                Preferences
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/notifications"
+                  onClick={() => setOpen(false)}
+                  className="text-xs font-semibold text-indigo-700 hover:underline"
+                >
+                  View all
+                </Link>
+                <Link
+                  to="/settings"
+                  onClick={() => setOpen(false)}
+                  className="text-xs font-semibold text-indigo-700 hover:underline"
+                >
+                  Preferences
+                </Link>
+              </div>
             </div>
             <div className="max-h-[22rem] overflow-y-auto">
               {items.length === 0 ? (
@@ -156,7 +143,7 @@ export function NotificationBell() {
                 <ul className="divide-y divide-border">
                   <AnimatePresence initial={false}>
                     {items.map((n, i) => {
-                      const Icon = typeIcon[n.type] ?? Bell;
+                      const Icon = notificationTypeIcon[n.type] ?? Bell;
                       const inner = (
                         <div className="flex gap-3 px-4 py-3 transition-colors hover:bg-accent/60">
                           <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg surface-tint text-indigo-700">

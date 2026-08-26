@@ -19,9 +19,11 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedClubsRouteImport } from './routes/_authenticated/clubs'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMenteesRouteImport } from './routes/_authenticated/mentees'
 import { Route as AuthenticatedMentorshipRouteImport } from './routes/_authenticated/mentorship'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedReportingRouteImport } from './routes/_authenticated/reporting'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as CertificateCertificateCodeRouteImport } from './routes/certificate.$certificateCode'
@@ -94,6 +96,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedClubsRoute = AuthenticatedClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -109,6 +116,12 @@ const AuthenticatedMentorshipRoute = AuthenticatedMentorshipRouteImport.update({
   path: '/mentorship',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReportingRoute = AuthenticatedReportingRouteImport.update({
   id: '/reporting',
   path: '/reporting',
@@ -238,9 +251,11 @@ export interface FileRoutesByFullPath {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/clubs': typeof AuthenticatedClubsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/mentorship': typeof AuthenticatedMentorshipRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -274,9 +289,11 @@ export interface FileRoutesByTo {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/clubs': typeof AuthenticatedClubsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/mentees': typeof AuthenticatedMenteesRoute
   '/mentorship': typeof AuthenticatedMentorshipRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/reporting': typeof AuthenticatedReportingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -312,9 +329,11 @@ export interface FileRoutesById {
   '/reference': typeof ReferenceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/clubs': typeof AuthenticatedClubsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/mentees': typeof AuthenticatedMenteesRoute
   '/_authenticated/mentorship': typeof AuthenticatedMentorshipRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/reporting': typeof AuthenticatedReportingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/certificate/$certificateCode': typeof CertificateCertificateCodeRoute
@@ -350,9 +369,11 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/clubs'
     | '/dashboard'
     | '/mentees'
     | '/mentorship'
+    | '/notifications'
     | '/reporting'
     | '/settings'
     | '/certificate/$certificateCode'
@@ -386,9 +407,11 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/admin'
+    | '/clubs'
     | '/dashboard'
     | '/mentees'
     | '/mentorship'
+    | '/notifications'
     | '/reporting'
     | '/settings'
     | '/certificate/$certificateCode'
@@ -423,9 +446,11 @@ export interface FileRouteTypes {
     | '/reference'
     | '/reset-password'
     | '/_authenticated/admin'
+    | '/_authenticated/clubs'
     | '/_authenticated/dashboard'
     | '/_authenticated/mentees'
     | '/_authenticated/mentorship'
+    | '/_authenticated/notifications'
     | '/_authenticated/reporting'
     | '/_authenticated/settings'
     | '/certificate/$certificateCode'
@@ -548,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clubs': {
+      id: '/_authenticated/clubs'
+      path: '/clubs'
+      fullPath: '/clubs'
+      preLoaderRoute: typeof AuthenticatedClubsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -567,6 +599,13 @@ declare module '@tanstack/react-router' {
       path: '/mentorship'
       fullPath: '/mentorship'
       preLoaderRoute: typeof AuthenticatedMentorshipRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reporting': {
@@ -728,9 +767,11 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedClubsRoute: typeof AuthenticatedClubsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMenteesRoute: typeof AuthenticatedMenteesRoute
   AuthenticatedMentorshipRoute: typeof AuthenticatedMentorshipRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedReportingRoute: typeof AuthenticatedReportingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
@@ -743,9 +784,11 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedClubsRoute: AuthenticatedClubsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMenteesRoute: AuthenticatedMenteesRoute,
   AuthenticatedMentorshipRoute: AuthenticatedMentorshipRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedReportingRoute: AuthenticatedReportingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
