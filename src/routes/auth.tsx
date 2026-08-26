@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -116,9 +116,7 @@ function AuthPage() {
         transition={{ duration: 0.6 }}
         className="relative hidden overflow-hidden surface-tint p-12 lg:flex lg:flex-col lg:justify-between"
       >
-        <Link to="/" className="font-display text-lg font-bold text-indigo-900">
-          ← Space
-        </Link>
+        <span className="font-display text-lg font-bold text-indigo-900">Space</span>
         <div>
           <h2 className="text-4xl leading-tight">Train like the contest already started.</h2>
           <p className="mt-4 max-w-sm text-sm text-indigo-700">
